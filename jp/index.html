@@ -24,6 +24,16 @@
     
     <style>
         body { font-family: 'Noto Sans JP', 'Pretendard', sans-serif; }
+        .yen-price { 
+            font-size: 0.75em; 
+            opacity: 0.7; 
+            font-weight: 500;
+        }
+        .summary-yen {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -133,19 +143,19 @@
                 <div class="time-card selected" data-hours="4" data-price="4000">
                     <div class="time-badge">人気</div>
                     <div class="time-hours">4時間</div>
-                    <div class="time-price">₩4,000</div>
+                    <div class="time-price">₩4,000 <span class="yen-price">(約¥430)</span></div>
                     <div class="time-desc">ショッピング後お食事まで</div>
                 </div>
                 
                 <div class="time-card" data-hours="8" data-price="7000">
                     <div class="time-badge best-value">お得</div>
                     <div class="time-hours">8時間</div>
-                    <div class="time-price">₩7,000</div>
+                    <div class="time-price">₩7,000 <span class="yen-price">(約¥750)</span></div>
                     <div class="time-desc">一日中聖水を探検</div>
                 </div>
             </div>
             
-            <p class="time-notice">* 超過時のみ1時間あたり₩1,000追加</p>
+            <p class="time-notice">* 超過時のみ1時間あたり₩1,000 (約¥110) 追加</p>
         </section>
 
         <!-- Summary & CTA -->
@@ -172,7 +182,7 @@
                 <div class="summary-divider"></div>
                 <div class="summary-row total">
                     <span>お支払い金額</span>
-                    <span class="summary-price" id="total-price">₩4,000</span>
+                    <span class="summary-price" id="total-price">₩4,000<span class="summary-yen">(約¥430)</span></span>
                 </div>
             </div>
             
@@ -223,14 +233,36 @@
             hours: (h) => `${h}時間`
         };
         
+        // 원화 → 엔화 환산 (약 0.107)
+        const krwToJpy = (krw) => Math.round(krw * 0.107);
+        
         // 도보 시간 텍스트 업데이트 오버라이드
         const originalUpdateSummary = updateSummary;
         updateSummary = function() {
             const sizeLabels = jpTexts.sizeLabels;
             document.getElementById('selected-size').textContent = sizeLabels[state.selectedSize];
             document.getElementById('selected-time').textContent = jpTexts.hours(state.selectedHours);
-            document.getElementById('total-price').textContent = `₩${state.selectedPrice.toLocaleString()}`;
+            const yen = krwToJpy(state.selectedPrice);
+            document.getElementById('total-price').innerHTML = `₩${state.selectedPrice.toLocaleString()}<span class="summary-yen">(約¥${yen})</span>`;
             updateTimeDisplay();
+        };
+        
+        // 가격 업데이트 시 엔화도 표시
+        const originalUpdatePrice = updatePrice;
+        updatePrice = function() {
+            const prices = PRICE_TABLE[state.selectedSize];
+            state.selectedPrice = prices[state.selectedHours];
+            
+            const timeCards = document.querySelectorAll('.time-card');
+            timeCards.forEach(card => {
+                const hours = parseInt(card.dataset.hours);
+                const price = prices[hours];
+                const yen = krwToJpy(price);
+                const priceEl = card.querySelector('.time-price');
+                if (priceEl) {
+                    priceEl.innerHTML = `₩${price.toLocaleString()} <span class="yen-price">(約¥${yen})</span>`;
+                }
+            });
         };
         
         // 선택 배지 텍스트 변경
