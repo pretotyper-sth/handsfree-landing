@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hands Free | 手ぶらで、聖水を満喫</title>
+    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="apple-touch-icon" href="../favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="../styles.css">
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T0LNG6BGGJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-T0LNG6BGGJ');
+    </script>
+    
+    <style>
+        body { font-family: 'Noto Sans JP', 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-text">HANDS FREE</div>
+            <p class="tagline">手ぶらで、聖水を満喫</p>
+        </header>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <div class="map-container" id="map-container">
+                <div id="map"></div>
+                <div class="walk-time-overlay" id="walk-time">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="5" r="2"></circle>
+                        <path d="M10 22V18L7 15V9L10 6H14L17 9V15L14 18V22"></path>
+                    </svg>
+                    <span>計算中...</span>
+                </div>
+            </div>
+            <div class="address-row">
+                <span class="destination-text">ヨンムジャンギル 81-1, 2階 (E/V有)</span>
+                <button class="copy-btn" id="copy-address" title="住所をコピー">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Toast -->
+        <div class="toast" id="toast">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>住所がコピーされました</span>
+        </div>
+
+        <!-- Size Selection -->
+        <section class="size-section">
+            <h2 class="section-title">サイズ選択</h2>
+            
+            <div class="size-cards">
+                <div class="size-card" data-size="S" data-price-4="4000" data-price-8="7000">
+                    <div class="size-header">
+                        <span class="size-label">S</span>
+                        <span class="size-available">残り3つ</span>
+                    </div>
+                    <div class="size-visual">
+                        <div class="locker-icon small"></div>
+                    </div>
+                    <div class="size-info">
+                        <p class="size-desc">小型バッグ1-2個</p>
+                        <p class="size-example">オリーブヤング袋基準</p>
+                    </div>
+                </div>
+                
+                <div class="size-card selected" data-size="M" data-price-4="4000" data-price-8="7000">
+                    <div class="size-header">
+                        <span class="size-label">M</span>
+                        <span class="size-available">残り5つ</span>
+                    </div>
+                    <div class="size-visual">
+                        <div class="locker-icon medium"></div>
+                    </div>
+                    <div class="size-info">
+                        <p class="size-desc">中型バッグ2-3個</p>
+                        <p class="size-example">ムシンサ袋基準</p>
+                    </div>
+                    <div class="selected-badge">選択中</div>
+                </div>
+                
+                <div class="size-card" data-size="L" data-price-4="5000" data-price-8="8000">
+                    <div class="size-header">
+                        <span class="size-label">L</span>
+                        <span class="size-available limited">残り1つ</span>
+                    </div>
+                    <div class="size-visual">
+                        <div class="locker-icon large"></div>
+                    </div>
+                    <div class="size-info">
+                        <p class="size-desc">大型バッグ3-5個</p>
+                        <p class="size-example">キャリーケースOK</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Time Selection -->
+        <section class="time-section">
+            <h2 class="section-title">ご利用時間選択</h2>
+            <div class="reservation-policy">
+                <div class="policy-item">
+                    <span class="policy-icon">⏱️</span>
+                    <span class="policy-text"><strong>30分以内</strong>の到着推奨（未到着時は自動開始）</span>
+                </div>
+                <div class="policy-item">
+                    <span class="policy-icon">📦</span>
+                    <span class="policy-text">回収時は残り時間に関係なく自動終了</span>
+                </div>
+            </div>
+            
+            <div class="time-cards">
+                <div class="time-card selected" data-hours="4" data-price="4000">
+                    <div class="time-badge">人気</div>
+                    <div class="time-hours">4時間</div>
+                    <div class="time-price">₩4,000</div>
+                    <div class="time-desc">ショッピング後お食事まで</div>
+                </div>
+                
+                <div class="time-card" data-hours="8" data-price="7000">
+                    <div class="time-badge best-value">お得</div>
+                    <div class="time-hours">8時間</div>
+                    <div class="time-price">₩7,000</div>
+                    <div class="time-desc">一日中聖水を探検</div>
+                </div>
+            </div>
+            
+            <p class="time-notice">* 超過時のみ1時間あたり₩1,000追加</p>
+        </section>
+
+        <!-- Summary & CTA -->
+        <section class="summary-section">
+            <div class="current-time-banner">
+                <span class="time-label">現在</span>
+                <span class="time-value" id="current-time">--:--</span>
+                <span class="time-deadline">未オープン時 <span id="deadline-time">--:--</span>に自動開始</span>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-row">
+                    <span>ロッカーサイズ</span>
+                    <span class="summary-value" id="selected-size">M (中型)</span>
+                </div>
+                <div class="summary-row">
+                    <span>ご利用時間</span>
+                    <span class="summary-value" id="selected-time">4時間</span>
+                </div>
+                <div class="summary-row">
+                    <span>終了予定</span>
+                    <span class="summary-value" id="end-time">--:--</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-row total">
+                    <span>お支払い金額</span>
+                    <span class="summary-price" id="total-price">₩4,000</span>
+                </div>
+            </div>
+            
+            <button class="cta-button" id="reserve-btn">
+                <span class="cta-text">予約する</span>
+                <span class="cta-arrow">→</span>
+            </button>
+            
+            <p class="cta-notice">アプリ不要、QRですぐ利用</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2026 Hands Free. All rights reserved.</p>
+            <p>Seoul, Seongsu</p>
+        </footer>
+    </div>
+
+    <!-- Error Modal (First click) -->
+    <div class="modal-overlay" id="error-modal">
+        <div class="modal-content">
+            <div class="modal-icon error">!</div>
+            <h3 class="modal-title">一時的なエラー</h3>
+            <p class="modal-desc">申し訳ございません。一時的なエラーが発生しました。<br>しばらくしてから再度お試しください。</p>
+            <button class="modal-btn primary" id="retry-btn">再試行</button>
+            <button class="modal-btn secondary" id="close-error-modal">閉じる</button>
+        </div>
+    </div>
+
+
+    <!-- Error Page (Second click) -->
+    <div class="error-page" id="error-page" style="display: none;">
+        <div class="error-code">503</div>
+        <div class="error-message">Service Unavailable</div>
+        <p class="error-desc">サービスが一時的にご利用いただけません。<br>しばらくしてから再度お試しください。</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        // 日本語用テキスト上書き
+        const jpTexts = {
+            walkTime: (min) => `徒歩 ${min}分`,
+            walkTimeApprox: (min) => `徒歩 約${min}分`,
+            calculating: '計算中...',
+            sizeLabels: { 'S': 'S (小型)', 'M': 'M (中型)', 'L': 'L (大型)' },
+            selectedBadge: '選択中',
+            hours: (h) => `${h}時間`
+        };
+        
+        // 도보 시간 텍스트 업데이트 오버라이드
+        const originalUpdateSummary = updateSummary;
+        updateSummary = function() {
+            const sizeLabels = jpTexts.sizeLabels;
+            document.getElementById('selected-size').textContent = sizeLabels[state.selectedSize];
+            document.getElementById('selected-time').textContent = jpTexts.hours(state.selectedHours);
+            document.getElementById('total-price').textContent = `₩${state.selectedPrice.toLocaleString()}`;
+            updateTimeDisplay();
+        };
+        
+        // 선택 배지 텍스트 변경
+        document.querySelectorAll('.selected-badge').forEach(badge => {
+            badge.textContent = jpTexts.selectedBadge;
+        });
+        
+        // 사이즈 선택 시 배지 텍스트 일본어로
+        const originalInitSize = initSizeSelection;
+        initSizeSelection = function() {
+            const sizeCards = document.querySelectorAll('.size-card');
+            sizeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    sizeCards.forEach(c => {
+                        c.classList.remove('selected');
+                        const badge = c.querySelector('.selected-badge');
+                        if (badge) badge.remove();
+                    });
+                    card.classList.add('selected');
+                    const badge = document.createElement('div');
+                    badge.className = 'selected-badge';
+                    badge.textContent = jpTexts.selectedBadge;
+                    card.appendChild(badge);
+                    state.selectedSize = card.dataset.size;
+                    updatePrice();
+                    updateSummary();
+                    Analytics.track('size_selected', {
+                        size: state.selectedSize,
+                        price: state.selectedPrice,
+                        language: 'ja'
+                    });
+                });
+            });
+        };
+    </script>
+</body>
+</html>
