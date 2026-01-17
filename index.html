@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hands Free | 손은 가볍게, 성수는 알차게</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
@@ -30,9 +32,15 @@
 
         <!-- Map Section -->
         <section class="map-section">
-            <div class="walk-time-text" id="walk-time">도보 계산 중...</div>
             <div class="map-container" id="map-container">
                 <div id="map"></div>
+                <div class="walk-time-overlay" id="walk-time">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="5" r="2"></circle>
+                        <path d="M10 22V18L7 15V9L10 6H14L17 9V15L14 18V22"></path>
+                    </svg>
+                    <span>계산 중...</span>
+                </div>
             </div>
             <div class="address-row">
                 <span class="destination-text">연무장길 81-1, 2층 (E/V 있음)</span>

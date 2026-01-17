@@ -221,7 +221,7 @@ async function fetchWalkingRoute() {
     if (straightDistance > 20000) {
         const walkingMinutes = Math.ceil(straightDistance * 1.4 / 80);
         console.log('[Hands Free] Too far, using estimate:', walkingMinutes, 'min');
-        document.getElementById('walk-time').textContent = `도보 ${walkingMinutes}분`;
+        document.getElementById('walk-time').querySelector('span').textContent = `도보 ${walkingMinutes}분`;
         drawFallbackRoute();
         return;
     }
@@ -254,7 +254,7 @@ async function fetchWalkingRoute() {
             const durationMin = Math.ceil(distanceM / 80);
             
             console.log('[Hands Free] Route calculated:', distanceM, 'm,', durationMin, 'min (walking speed: 80m/min)');
-            document.getElementById('walk-time').textContent = `도보 ${durationMin}분`;
+            document.getElementById('walk-time').querySelector('span').textContent = `도보 ${durationMin}분`;
             
             Analytics.track('route_calculated', {
                 durationMin,
@@ -302,7 +302,7 @@ function drawRoute(latLngs) {
 function updateDistanceFallback() {
     if (!state.userLocation) {
         console.log('[Hands Free] No location for fallback, using default');
-        document.getElementById('walk-time').textContent = '도보 약 2분';
+        document.getElementById('walk-time').querySelector('span').textContent = '도보 약 2분';
         return;
     }
     
@@ -317,7 +317,7 @@ function updateDistanceFallback() {
     const walkingMinutes = Math.max(1, Math.ceil(walkingDistance / 80));
     
     console.log('[Hands Free] Fallback calculation:', walkingDistance, 'm,', walkingMinutes, 'min');
-    document.getElementById('walk-time').textContent = `도보 약 ${walkingMinutes}분`;
+    document.getElementById('walk-time').querySelector('span').textContent = `도보 약 ${walkingMinutes}분`;
     
     Analytics.track('route_calculated', {
         durationMin: walkingMinutes,

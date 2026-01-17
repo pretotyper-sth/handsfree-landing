@@ -103,11 +103,28 @@ body {
     margin-bottom: 24px;
 }
 
-.walk-time-text {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 12px;
+/* Walk Time Overlay - Clean */
+.walk-time-overlay {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.walk-time-overlay svg {
+    display: none;
+}
+
+.walk-time-overlay::before {
+    content: '🚶';
+    font-size: 16px;
 }
 
 .map-container {
