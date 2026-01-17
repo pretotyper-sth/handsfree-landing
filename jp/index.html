@@ -253,8 +253,26 @@
             observer.observe(walkTimeEl, { childList: true, characterData: true, subtree: true });
         }
         
-        // 원화 → 엔화 환산 (약 0.107)
-        const krwToJpy = (krw) => Math.round(krw * 0.107);
+        // 원화 → 엔화 환산 (실시간 환율)
+        let exchangeRate = 0.107; // 기본값 (폴백용)
+        
+        // 실시간 환율 가져오기
+        fetch('https://open.er-api.com/v6/latest/KRW')
+            .then(res => res.json())
+            .then(data => {
+                if (data.rates && data.rates.JPY) {
+                    exchangeRate = data.rates.JPY;
+                    console.log('[Hands Free] 실시간 환율 적용:', exchangeRate);
+                    // 환율 로드 후 가격 업데이트
+                    updatePrice();
+                    updateSummary();
+                }
+            })
+            .catch(err => {
+                console.log('[Hands Free] 환율 API 실패, 기본값 사용:', exchangeRate);
+            });
+        
+        const krwToJpy = (krw) => Math.round(krw * exchangeRate);
         
         // 도보 시간 텍스트 업데이트 오버라이드
         const originalUpdateSummary = updateSummary;
