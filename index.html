@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hands Free | 손은 가볍게, 성수는 알차게</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T0LNG6BGGJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-T0LNG6BGGJ');
+    </script>
+</head>
+<body>
+    <div class="app-container" id="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-text">Hands Free</div>
+            <p class="tagline">손은 가볍게, 성수는 알차게</p>
+        </header>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <div class="walk-time-text" id="walk-time">도보 계산 중...</div>
+            <div class="map-container" id="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="address-row">
+                <span class="destination-text">연무장길 81-1, 2층 (E/V 있음)</span>
+                <button class="copy-btn" id="copy-address" title="주소 복사">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Toast -->
+        <div class="toast" id="toast">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>주소가 복사되었습니다</span>
+        </div>
+
+        <!-- Size Selection -->
+        <section class="size-section">
+            <h2 class="section-title">사이즈 선택</h2>
+            
+            <div class="size-cards">
+                <div class="size-card" data-size="S" data-price-4="4000" data-price-8="7000">
+                    <div class="size-header">
+                        <span class="size-label">S</span>
+                        <span class="size-available">3칸 남음</span>
+                    </div>
+                    <div class="size-visual">
+                        <div class="locker-icon small"></div>
+                    </div>
+                    <div class="size-info">
+                        <p class="size-desc">소형 쇼핑백 1-2개</p>
+                        <p class="size-example">올리브영 쇼핑백 기준</p>
+                    </div>
+                </div>
+                
+                <div class="size-card selected" data-size="M" data-price-4="4000" data-price-8="7000">
+                    <div class="size-header">
+                        <span class="size-label">M</span>
+                        <span class="size-available">5칸 남음</span>
+                    </div>
+                    <div class="size-visual">
+                        <div class="locker-icon medium"></div>
+                    </div>
+                    <div class="size-info">
+                        <p class="size-desc">중형 쇼핑백 2-3개</p>
+                        <p class="size-example">무신사 쇼핑백 기준</p>
+                    </div>
+                    <div class="selected-badge">선택됨</div>
+                </div>
+                
+                <div class="size-card" data-size="L" data-price-4="5000" data-price-8="8000">
+                    <div class="size-header">
+                        <span class="size-label">L</span>
+                        <span class="size-available limited">1칸 남음</span>
+                    </div>
+                    <div class="size-visual">
+                        <div class="locker-icon large"></div>
+                    </div>
+                    <div class="size-info">
+                        <p class="size-desc">대형 쇼핑백 3-5개</p>
+                        <p class="size-example">캐리어 가능</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Time Selection -->
+        <section class="time-section">
+            <h2 class="section-title">이용 시간 선택</h2>
+            <div class="reservation-policy">
+                <div class="policy-item">
+                    <span class="policy-icon">⏱️</span>
+                    <span class="policy-text"><strong>30분 내</strong> 도착 권장 (미도착 시 자동 시작)</span>
+                </div>
+                <div class="policy-item">
+                    <span class="policy-icon">📦</span>
+                    <span class="policy-text">회수 시 남은 시간과 상관없이 자동 종료</span>
+                </div>
+            </div>
+            
+            <div class="time-cards">
+                <div class="time-card selected" data-hours="4" data-price="4000">
+                    <div class="time-badge">인기</div>
+                    <div class="time-hours">4시간</div>
+                    <div class="time-price">₩4,000</div>
+                    <div class="time-desc">쇼핑 후 식사까지</div>
+                </div>
+                
+                <div class="time-card" data-hours="8" data-price="7000">
+                    <div class="time-badge best-value">최저가</div>
+                    <div class="time-hours">8시간</div>
+                    <div class="time-price">₩7,000</div>
+                    <div class="time-desc">하루 종일 성수 탐험</div>
+                </div>
+            </div>
+            
+            <p class="time-notice">* 시간 초과 시에만 시간당 ₩1,000 추가</p>
+        </section>
+
+        <!-- Summary & CTA -->
+        <section class="summary-section">
+            <div class="current-time-banner">
+                <span class="time-label">현재</span>
+                <span class="time-value" id="current-time">--:--</span>
+                <span class="time-deadline">미오픈 시 <span id="deadline-time">--:--</span>에 자동 시작</span>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-row">
+                    <span>보관함 사이즈</span>
+                    <span class="summary-value" id="selected-size">M (중형)</span>
+                </div>
+                <div class="summary-row">
+                    <span>이용 시간</span>
+                    <span class="summary-value" id="selected-time">4시간</span>
+                </div>
+                <div class="summary-row">
+                    <span>예상 종료</span>
+                    <span class="summary-value" id="end-time">--:--</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-row total">
+                    <span>결제 금액</span>
+                    <span class="summary-price" id="total-price">₩4,000</span>
+                </div>
+            </div>
+            
+            <button class="cta-button" id="reserve-btn">
+                <span class="cta-text">예약하기</span>
+                <span class="cta-arrow">→</span>
+            </button>
+            
+            <p class="cta-notice">앱 설치 없이 QR로 바로 이용</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2025 Hands Free</p>
+        </footer>
+    </div>
+
+    <!-- Error Modal (First click) -->
+    <div class="modal-overlay" id="error-modal">
+        <div class="modal-content">
+            <div class="modal-icon error">!</div>
+            <h3 class="modal-title">일시적인 오류</h3>
+            <p class="modal-desc">죄송합니다. 일시적인 오류가 발생했습니다.<br>잠시 후 다시 시도해 주세요.</p>
+            <button class="modal-btn primary" id="retry-btn">다시 시도</button>
+            <button class="modal-btn secondary" id="close-error-modal">닫기</button>
+        </div>
+    </div>
+
+
+    <!-- Error Page (Second click) -->
+    <div class="error-page" id="error-page" style="display: none;">
+        <div class="error-code">503</div>
+        <div class="error-message">Service Unavailable</div>
+        <p class="error-desc">서비스가 일시적으로 이용 불가합니다.<br>잠시 후 다시 시도해 주세요.</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
