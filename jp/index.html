@@ -56,7 +56,7 @@
                         <circle cx="12" cy="5" r="2"></circle>
                         <path d="M10 22V18L7 15V9L10 6H14L17 9V15L14 18V22"></path>
                     </svg>
-                    <span>計算中...</span>
+                    <span id="walk-time-text">計算中...</span>
                 </div>
             </div>
             <div class="address-row">
@@ -235,6 +235,23 @@
             selectedBadge: '選択中',
             hours: (h) => `${h}時間`
         };
+        
+        // 도보 시간 텍스트를 일본어로 변환하는 MutationObserver
+        const walkTimeEl = document.getElementById('walk-time-text');
+        if (walkTimeEl) {
+            const observer = new MutationObserver(() => {
+                const text = walkTimeEl.textContent;
+                if (text.includes('도보')) {
+                    // 한국어 → 일본어 변환
+                    const converted = text
+                        .replace('도보 약', '徒歩 約')
+                        .replace('도보', '徒歩')
+                        .replace('분', '分');
+                    walkTimeEl.textContent = converted;
+                }
+            });
+            observer.observe(walkTimeEl, { childList: true, characterData: true, subtree: true });
+        }
         
         // 원화 → 엔화 환산 (약 0.107)
         const krwToJpy = (krw) => Math.round(krw * 0.107);
