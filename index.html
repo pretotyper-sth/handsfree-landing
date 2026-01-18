@@ -147,10 +147,28 @@
             <p class="time-notice">* 시간 초과 시에만 시간당 ₩1,000 추가</p>
         </section>
 
+        <!-- Date/Time Selection -->
+        <section class="datetime-section">
+            <h2 class="section-title">이용 시작 일시</h2>
+            <div class="datetime-picker">
+                <div class="datetime-input-group">
+                    <label class="datetime-label">
+                        <span class="datetime-icon">📅</span>
+                        <input type="date" id="reserve-date" class="datetime-input">
+                    </label>
+                    <label class="datetime-label">
+                        <span class="datetime-icon">⏰</span>
+                        <input type="time" id="reserve-time" class="datetime-input">
+                    </label>
+                </div>
+                <p class="datetime-notice">* 예약 시간 기준 30분 내 도착 권장</p>
+            </div>
+        </section>
+
         <!-- Summary & CTA -->
         <section class="summary-section">
             <div class="current-time-banner">
-                <span class="time-label">현재</span>
+                <span class="time-label">시작</span>
                 <span class="time-value" id="current-time">--:--</span>
                 <span class="time-deadline">미오픈 시 <span id="deadline-time">--:--</span>에 자동 시작</span>
             </div>

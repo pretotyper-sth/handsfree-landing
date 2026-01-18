@@ -25,6 +25,8 @@ let state = {
     selectedSize: 'M',
     selectedHours: 4,
     selectedPrice: 4000,
+    selectedDate: null,  // 선택된 날짜
+    selectedTime: null,  // 선택된 시간
     userLocation: null,
     map: null,
     currentMarker: null,
@@ -92,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initGeolocation();
     initSizeSelection();
     initTimeSelection();
+    initDateTimePicker();
     initReserveButton();
     initErrorModal();
     initTimeDisplay();
@@ -516,6 +519,62 @@ function updatePrice() {
     });
 }
 
+// ===== Date/Time Picker =====
+function initDateTimePicker() {
+    const dateInput = document.getElementById('reserve-date');
+    const timeInput = document.getElementById('reserve-time');
+    
+    if (!dateInput || !timeInput) return;
+    
+    // 기본값: 현재 날짜/시간
+    const now = new Date();
+    state.selectedDate = formatDateValue(now);
+    state.selectedTime = formatTimeValue(now);
+    
+    dateInput.value = state.selectedDate;
+    timeInput.value = state.selectedTime;
+    
+    // 최소 날짜: 오늘
+    dateInput.min = state.selectedDate;
+    // 최대 날짜: 30일 후
+    const maxDate = new Date(now.getTime() + 30 * 24 * 60 * 60000);
+    dateInput.max = formatDateValue(maxDate);
+    
+    // 날짜 변경 시
+    dateInput.addEventListener('change', () => {
+        state.selectedDate = dateInput.value;
+        updateTimeDisplay();
+        
+        Analytics.track('date_selected', {
+            date: state.selectedDate,
+            isToday: state.selectedDate === formatDateValue(new Date())
+        });
+    });
+    
+    // 시간 변경 시
+    timeInput.addEventListener('change', () => {
+        state.selectedTime = timeInput.value;
+        updateTimeDisplay();
+        
+        Analytics.track('time_input_selected', {
+            time: state.selectedTime
+        });
+    });
+}
+
+function formatDateValue(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function formatTimeValue(date) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
 // ===== Time Display =====
 function initTimeDisplay() {
     updateTimeDisplay();
@@ -523,13 +582,20 @@ function initTimeDisplay() {
 }
 
 function updateTimeDisplay() {
-    const now = new Date();
-    const currentTimeStr = formatTime(now);
+    // 선택된 날짜/시간이 있으면 그것을 기준으로, 없으면 현재 시간
+    let startTime;
+    if (state.selectedDate && state.selectedTime) {
+        startTime = new Date(`${state.selectedDate}T${state.selectedTime}`);
+    } else {
+        startTime = new Date();
+    }
     
-    const deadline = new Date(now.getTime() + CONFIG.arrivalBuffer * 60000);
+    const currentTimeStr = formatTime(startTime);
+    
+    const deadline = new Date(startTime.getTime() + CONFIG.arrivalBuffer * 60000);
     const deadlineStr = formatTime(deadline);
     
-    const endTime = new Date(now.getTime() + state.selectedHours * 60 * 60000);
+    const endTime = new Date(startTime.getTime() + state.selectedHours * 60 * 60000);
     const endTimeStr = formatTime(endTime);
     
     document.getElementById('current-time').textContent = currentTimeStr;
