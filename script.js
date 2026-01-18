@@ -398,11 +398,17 @@ function initMap() {
         iconAnchor: [7, 7]
     });
 
+    // 일본어 페이지인 경우 경로 조정
+    const isJpPage = window.location.pathname.includes('/jp');
+    const logoPath = isJpPage ? '../favicon.png' : 'favicon.png';
+    
     const destinationIcon = L.divIcon({
         className: 'custom-marker',
-        html: '<div class="marker-destination"></div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 24]
+        html: `<div class="marker-destination-wrap">
+            <img src="${logoPath}" class="marker-logo" alt="Hands Free">
+        </div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
     });
 
     state.currentMarker = L.marker([startLocation.lat, startLocation.lng], {
@@ -521,45 +527,321 @@ function updatePrice() {
 
 // ===== Date/Time Picker =====
 function initDateTimePicker() {
-    const dateInput = document.getElementById('reserve-date');
-    const timeInput = document.getElementById('reserve-time');
-    
-    if (!dateInput || !timeInput) return;
+    const datePickerBtn = document.getElementById('date-picker-btn');
+    const timePickerBtn = document.getElementById('time-picker-btn');
     
     // 기본값: 현재 날짜/시간
     const now = new Date();
     state.selectedDate = formatDateValue(now);
     state.selectedTime = formatTimeValue(now);
     
-    dateInput.value = state.selectedDate;
-    timeInput.value = state.selectedTime;
+    // 초기 표시 업데이트
+    updateDateTimeDisplay();
     
-    // 최소 날짜: 오늘
-    dateInput.min = state.selectedDate;
-    // 최대 날짜: 30일 후
-    const maxDate = new Date(now.getTime() + 30 * 24 * 60 * 60000);
-    dateInput.max = formatDateValue(maxDate);
+    // 클릭 시 picker 열기
+    if (datePickerBtn) {
+        datePickerBtn.addEventListener('click', () => {
+            openCustomDatePicker();
+        });
+    }
     
-    // 날짜 변경 시
-    dateInput.addEventListener('change', () => {
-        state.selectedDate = dateInput.value;
-        updateTimeDisplay();
+    if (timePickerBtn) {
+        timePickerBtn.addEventListener('click', () => {
+            openCustomTimePicker();
+        });
+    }
+    
+    // 커스텀 picker 초기화
+    initCustomDatePicker();
+    initCustomTimePicker();
+}
+
+// ===== Custom Date Picker =====
+function initCustomDatePicker() {
+    const modal = document.getElementById('date-picker-modal');
+    const closeBtn = document.getElementById('date-picker-close');
+    const confirmBtn = document.getElementById('date-picker-confirm');
+    const monthColumn = document.getElementById('month-column');
+    const dayColumn = document.getElementById('day-column');
+    
+    if (!modal || !monthColumn || !dayColumn) return;
+    
+    const now = new Date();
+    const currentDay = now.getDate();
+    const currentYear = now.getFullYear();
+    
+    // 월 옵션 생성 (현재월부터 +3개월, 총 4개월)
+    for (let i = 0; i <= 3; i++) {
+        const targetDate = new Date(currentYear, now.getMonth() + i, 1);
+        const monthNum = targetDate.getMonth() + 1;
+        const yearNum = targetDate.getFullYear();
+        const option = document.createElement('div');
+        option.className = 'time-option' + (i === 0 ? ' selected' : '');
+        option.dataset.value = monthNum.toString();
+        option.dataset.year = yearNum.toString();
+        option.dataset.offset = i.toString();
+        option.textContent = `${monthNum}월`;
+        monthColumn.appendChild(option);
+    }
+    
+    // 초기 일 옵션 생성
+    updateDayOptions(0);
+    
+    // 월 클릭 이벤트
+    monthColumn.addEventListener('click', (e) => {
+        if (e.target.classList.contains('time-option') && !e.target.classList.contains('disabled')) {
+            monthColumn.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+            e.target.classList.add('selected');
+            // 선택한 항목을 중앙으로 스크롤
+            e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            // 월 변경 시 일 옵션 업데이트
+            const offset = parseInt(e.target.dataset.offset);
+            updateDayOptions(offset);
+        }
+    });
+    
+    // 일 클릭 이벤트
+    dayColumn.addEventListener('click', (e) => {
+        if (e.target.classList.contains('time-option') && !e.target.classList.contains('disabled')) {
+            dayColumn.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+            e.target.classList.add('selected');
+            // 선택한 항목을 중앙으로 스크롤
+            e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+    });
+    
+    // 일 옵션 업데이트 함수
+    function updateDayOptions(monthOffset) {
+        const now = new Date();
+        const currentDay = now.getDate();
         
-        Analytics.track('date_selected', {
-            date: state.selectedDate,
-            isToday: state.selectedDate === formatDateValue(new Date())
+        // 선택된 월의 마지막 날 계산
+        const targetMonth = new Date(now.getFullYear(), now.getMonth() + monthOffset + 1, 0);
+        const daysInMonth = targetMonth.getDate();
+        
+        // 기존 옵션 제거
+        dayColumn.innerHTML = '';
+        
+        // 시작일과 종료일 계산
+        let startDay = 1;
+        let endDay = daysInMonth;
+        
+        if (monthOffset === 0) {
+            // 현재 월: 오늘부터
+            startDay = currentDay;
+        } else if (monthOffset === 3) {
+            // 3개월 후: 오늘 날짜까지만
+            endDay = Math.min(currentDay, daysInMonth);
+        }
+        
+        // 일 옵션 생성
+        for (let i = startDay; i <= endDay; i++) {
+            const option = document.createElement('div');
+            option.className = 'time-option' + (i === startDay ? ' selected' : '');
+            option.dataset.value = i.toString();
+            option.textContent = `${i}일`;
+            dayColumn.appendChild(option);
+        }
+        
+        // 스크롤 맨 위로
+        dayColumn.scrollTop = 0;
+    }
+    
+    // 닫기
+    closeBtn.addEventListener('click', closeCustomDatePicker);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeCustomDatePicker();
+    });
+    
+    // 확인
+    confirmBtn.addEventListener('click', () => {
+        const monthEl = document.querySelector('#month-column .time-option.selected');
+        const dayEl = document.querySelector('#day-column .time-option.selected');
+        
+        if (monthEl && dayEl) {
+            const year = parseInt(monthEl.dataset.year);
+            const month = parseInt(monthEl.dataset.value) - 1; // 0-indexed
+            const day = parseInt(dayEl.dataset.value);
+            
+            const targetDate = new Date(year, month, day);
+            
+            state.selectedDate = formatDateValue(targetDate);
+            updateDateTimeDisplay();
+            updateTimeDisplay();
+            
+            Analytics.track('date_selected', {
+                date: state.selectedDate,
+                isToday: state.selectedDate === formatDateValue(new Date())
+            });
+        }
+        
+        closeCustomDatePicker();
+    });
+}
+
+function openCustomDatePicker() {
+    const modal = document.getElementById('date-picker-modal');
+    if (modal) {
+        // 현재 선택된 날짜로 스크롤
+        if (state.selectedDate) {
+            const [year, month, day] = state.selectedDate.split('-');
+            const dayColumn = document.getElementById('day-column');
+            const selectedDayOption = dayColumn?.querySelector(`[data-value="${parseInt(day)}"]`);
+            if (selectedDayOption) {
+                dayColumn.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+                selectedDayOption.classList.add('selected');
+                selectedDayOption.scrollIntoView({ block: 'center', behavior: 'instant' });
+            }
+        }
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeCustomDatePicker() {
+    const modal = document.getElementById('date-picker-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// ===== Custom Time Picker =====
+function initCustomTimePicker() {
+    const modal = document.getElementById('time-picker-modal');
+    const closeBtn = document.getElementById('time-picker-close');
+    const confirmBtn = document.getElementById('time-picker-confirm');
+    const hourColumn = document.getElementById('hour-column');
+    const minuteColumn = document.getElementById('minute-column');
+    
+    if (!modal || !hourColumn || !minuteColumn) return;
+    
+    // 시간 옵션 생성 (1-12)
+    for (let i = 1; i <= 12; i++) {
+        const option = document.createElement('div');
+        option.className = 'time-option' + (i === 1 ? ' selected' : '');
+        option.dataset.value = i.toString();
+        option.textContent = i;
+        hourColumn.appendChild(option);
+    }
+    
+    // 분 옵션 생성 (0-59, 1분 단위)
+    for (let i = 0; i < 60; i++) {
+        const option = document.createElement('div');
+        const minStr = String(i).padStart(2, '0');
+        option.className = 'time-option' + (i === 0 ? ' selected' : '');
+        option.dataset.value = minStr;
+        option.textContent = minStr;
+        minuteColumn.appendChild(option);
+    }
+    
+    // 옵션 클릭 이벤트
+    document.querySelectorAll('#time-picker-modal .time-picker-column').forEach(column => {
+        column.addEventListener('click', (e) => {
+            if (e.target.classList.contains('time-option')) {
+                column.querySelectorAll('.time-option').forEach(opt => opt.classList.remove('selected'));
+                e.target.classList.add('selected');
+                // 선택한 항목을 중앙으로 스크롤
+                e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
         });
     });
     
-    // 시간 변경 시
-    timeInput.addEventListener('change', () => {
-        state.selectedTime = timeInput.value;
-        updateTimeDisplay();
-        
-        Analytics.track('time_input_selected', {
-            time: state.selectedTime
-        });
+    // 닫기
+    closeBtn.addEventListener('click', closeCustomTimePicker);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeCustomTimePicker();
     });
+    
+    // 확인
+    confirmBtn.addEventListener('click', () => {
+        const period = document.querySelector('#period-column .time-option.selected')?.dataset.value;
+        const hour = document.querySelector('#hour-column .time-option.selected')?.dataset.value;
+        const minute = document.querySelector('#minute-column .time-option.selected')?.dataset.value;
+        
+        if (period && hour && minute) {
+            let h = parseInt(hour);
+            if (period === 'PM' && h !== 12) h += 12;
+            if (period === 'AM' && h === 12) h = 0;
+            
+            state.selectedTime = `${String(h).padStart(2, '0')}:${minute}`;
+            updateDateTimeDisplay();
+            updateTimeDisplay();
+            
+            Analytics.track('time_input_selected', {
+                time: state.selectedTime
+            });
+        }
+        
+        closeCustomTimePicker();
+    });
+}
+
+function openCustomTimePicker() {
+    const modal = document.getElementById('time-picker-modal');
+    if (modal) {
+        // 현재 선택된 시간으로 초기화
+        if (state.selectedTime) {
+            const [hours, minutes] = state.selectedTime.split(':');
+            const h = parseInt(hours);
+            const m = parseInt(minutes);
+            const isPM = h >= 12;
+            const displayHour = h % 12 || 12;
+            
+            // 오전/오후 선택
+            document.querySelectorAll('#period-column .time-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.value === (isPM ? 'PM' : 'AM'));
+            });
+            
+            // 시간 선택
+            const hourColumn = document.getElementById('hour-column');
+            hourColumn.querySelectorAll('.time-option').forEach(opt => {
+                const isSelected = parseInt(opt.dataset.value) === displayHour;
+                opt.classList.toggle('selected', isSelected);
+                if (isSelected) opt.scrollIntoView({ block: 'center', behavior: 'instant' });
+            });
+            
+            // 분 선택 (현재 분 그대로)
+            const nearestMinute = String(m).padStart(2, '0');
+            const minuteColumn = document.getElementById('minute-column');
+            minuteColumn.querySelectorAll('.time-option').forEach(opt => {
+                const isSelected = opt.dataset.value === nearestMinute;
+                opt.classList.toggle('selected', isSelected);
+                if (isSelected) opt.scrollIntoView({ block: 'center', behavior: 'instant' });
+            });
+        }
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeCustomTimePicker() {
+    const modal = document.getElementById('time-picker-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function updateDateTimeDisplay() {
+    const dateDisplay = document.getElementById('date-display');
+    const timeDisplay = document.getElementById('time-display');
+    
+    if (dateDisplay && state.selectedDate) {
+        const [year, month, day] = state.selectedDate.split('-');
+        const shortYear = year.slice(2); // 2026 -> 26
+        dateDisplay.textContent = `${shortYear}년 ${parseInt(month)}월 ${parseInt(day)}일`;
+    }
+    
+    if (timeDisplay && state.selectedTime) {
+        const [hours, minutes] = state.selectedTime.split(':');
+        const h = parseInt(hours);
+        const period = h < 12 ? '오전' : '오후';
+        const displayHour = h % 12 || 12;
+        timeDisplay.textContent = `${period} ${displayHour}:${minutes}`;
+    }
 }
 
 function formatDateValue(date) {
