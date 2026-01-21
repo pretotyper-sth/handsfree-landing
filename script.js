@@ -569,9 +569,16 @@ function updateTimeCardAvailability() {
     timeCards.forEach(card => {
         const hours = parseInt(card.dataset.hours);
         const availableCount = getAvailability(state.selectedSize, hours);
+        const badge = card.querySelector('.time-badge');
         
         if (availableCount === 0) {
             card.classList.add('disabled');
+            // 뱃지 텍스트를 "마감"으로 변경
+            if (badge) {
+                badge.dataset.originalText = badge.dataset.originalText || badge.textContent;
+                badge.textContent = isJapanese ? '満室' : '마감';
+                badge.classList.add('sold-out');
+            }
             // 비활성화된 카드가 선택되어 있으면 4시간으로 변경
             if (card.classList.contains('selected')) {
                 card.classList.remove('selected');
@@ -585,6 +592,11 @@ function updateTimeCardAvailability() {
             }
         } else {
             card.classList.remove('disabled');
+            // 뱃지 텍스트 원래대로 복원
+            if (badge && badge.dataset.originalText) {
+                badge.textContent = badge.dataset.originalText;
+                badge.classList.remove('sold-out');
+            }
         }
     });
 }

@@ -449,7 +449,11 @@ body {
 }
 
 .time-card.disabled .time-badge {
-    background: var(--text-muted);
+    background: #ff6b6b;
+}
+
+.time-badge.sold-out {
+    background: #ff6b6b !important;
 }
 
 .time-badge {
