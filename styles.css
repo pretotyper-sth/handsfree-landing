@@ -450,8 +450,8 @@ body {
 
 .time-card.disabled .time-badge,
 .time-badge.sold-out {
-    background: rgba(255, 107, 107, 0.15) !important;
-    color: #ff6b6b !important;
+    background: #ff6b6b !important;
+    color: #fff !important;
 }
 
 .time-badge {
