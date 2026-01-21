@@ -64,6 +64,57 @@
             <span>주소가 복사되었습니다</span>
         </div>
 
+        <!-- Date/Time Selection -->
+        <section class="datetime-section">
+            <h2 class="section-title">이용 시작 일시</h2>
+            <div class="datetime-picker">
+                <div class="datetime-input-group">
+                    <div class="datetime-label" id="date-picker-btn">
+                        <span class="datetime-icon">📅</span>
+                        <span class="datetime-display" id="date-display">26년 1월 18일</span>
+                    </div>
+                    <div class="datetime-label" id="time-picker-btn">
+                        <span class="datetime-icon">⏰</span>
+                        <span class="datetime-display" id="time-display">오후 1:00</span>
+                    </div>
+                </div>
+                <p class="datetime-notice">* 예약 시간 기준 30분 내 도착 권장</p>
+            </div>
+        </section>
+
+        <!-- Time Selection -->
+        <section class="time-section">
+            <h2 class="section-title">이용 시간 선택</h2>
+            <div class="reservation-policy">
+                <div class="policy-item">
+                    <span class="policy-icon">⏱️</span>
+                    <span class="policy-text"><strong>30분 내</strong> 도착 권장 (미도착 시 자동 시작)</span>
+                </div>
+                <div class="policy-item">
+                    <span class="policy-icon">📦</span>
+                    <span class="policy-text">짐 회수 시 남은 시간과 상관없이 자동 종료</span>
+                </div>
+            </div>
+            
+            <div class="time-cards">
+                <div class="time-card selected" data-hours="4" data-price="4000">
+                    <div class="time-badge">인기</div>
+                    <div class="time-hours">4시간</div>
+                    <div class="time-price">₩4,000</div>
+                    <div class="time-desc">쇼핑 후 식사까지</div>
+                </div>
+                
+                <div class="time-card" data-hours="8" data-price="7000">
+                    <div class="time-badge best-value">최저가</div>
+                    <div class="time-hours">8시간</div>
+                    <div class="time-price">₩7,000</div>
+                    <div class="time-desc">하루 종일 성수 탐험</div>
+                </div>
+            </div>
+            
+            <p class="time-notice">* 시간 초과 시에만 시간당 ₩1,000 추가</p>
+        </section>
+
         <!-- Size Selection -->
         <section class="size-section">
             <h2 class="section-title">사이즈 선택</h2>
@@ -111,57 +162,6 @@
                         <p class="size-example">20인치 캐리어 기준</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Time Selection -->
-        <section class="time-section">
-            <h2 class="section-title">이용 시간 선택</h2>
-            <div class="reservation-policy">
-                <div class="policy-item">
-                    <span class="policy-icon">⏱️</span>
-                    <span class="policy-text"><strong>30분 내</strong> 도착 권장 (미도착 시 자동 시작)</span>
-                </div>
-                <div class="policy-item">
-                    <span class="policy-icon">📦</span>
-                    <span class="policy-text">짐 회수 시 남은 시간과 상관없이 자동 종료</span>
-                </div>
-            </div>
-            
-            <div class="time-cards">
-                <div class="time-card selected" data-hours="4" data-price="4000">
-                    <div class="time-badge">인기</div>
-                    <div class="time-hours">4시간</div>
-                    <div class="time-price">₩4,000</div>
-                    <div class="time-desc">쇼핑 후 식사까지</div>
-                </div>
-                
-                <div class="time-card" data-hours="8" data-price="7000">
-                    <div class="time-badge best-value">최저가</div>
-                    <div class="time-hours">8시간</div>
-                    <div class="time-price">₩7,000</div>
-                    <div class="time-desc">하루 종일 성수 탐험</div>
-                </div>
-            </div>
-            
-            <p class="time-notice">* 시간 초과 시에만 시간당 ₩1,000 추가</p>
-        </section>
-
-        <!-- Date/Time Selection -->
-        <section class="datetime-section">
-            <h2 class="section-title">이용 시작 일시</h2>
-            <div class="datetime-picker">
-                <div class="datetime-input-group">
-                    <div class="datetime-label" id="date-picker-btn">
-                        <span class="datetime-icon">📅</span>
-                        <span class="datetime-display" id="date-display">26년 1월 18일</span>
-                    </div>
-                    <div class="datetime-label" id="time-picker-btn">
-                        <span class="datetime-icon">⏰</span>
-                        <span class="datetime-display" id="time-display">오후 1:00</span>
-                    </div>
-                </div>
-                <p class="datetime-notice">* 예약 시간 기준 30분 내 도착 권장</p>
             </div>
         </section>
 

@@ -84,6 +84,57 @@
             <span>住所がコピーされました</span>
         </div>
 
+        <!-- Date/Time Selection -->
+        <section class="datetime-section">
+            <h2 class="section-title">ご利用開始日時</h2>
+            <div class="datetime-picker">
+                <div class="datetime-input-group">
+                    <div class="datetime-label" id="date-picker-btn">
+                        <span class="datetime-icon">📅</span>
+                        <span class="datetime-display" id="date-display">26年1月18日</span>
+                    </div>
+                    <div class="datetime-label" id="time-picker-btn">
+                        <span class="datetime-icon">⏰</span>
+                        <span class="datetime-display" id="time-display">午後1:00</span>
+                    </div>
+                </div>
+                <p class="datetime-notice">* 予約時間から30分以内の到着推奨</p>
+            </div>
+        </section>
+
+        <!-- Time Selection -->
+        <section class="time-section">
+            <h2 class="section-title">ご利用時間選択</h2>
+            <div class="reservation-policy">
+                <div class="policy-item">
+                    <span class="policy-icon">⏱️</span>
+                    <span class="policy-text"><strong>30分以内</strong>の到着推奨（未到着時は自動開始）</span>
+                </div>
+                <div class="policy-item">
+                    <span class="policy-icon">📦</span>
+                    <span class="policy-text">荷物回収時は残り時間に関係なく自動終了</span>
+                </div>
+            </div>
+            
+            <div class="time-cards">
+                <div class="time-card selected" data-hours="4" data-price="4000">
+                    <div class="time-badge">人気</div>
+                    <div class="time-hours">4時間</div>
+                    <div class="time-price">₩4,000 <span class="yen-price">(約¥430)</span></div>
+                    <div class="time-desc">ショッピング後お食事まで</div>
+                </div>
+                
+                <div class="time-card" data-hours="8" data-price="7000">
+                    <div class="time-badge best-value">お得</div>
+                    <div class="time-hours">8時間</div>
+                    <div class="time-price">₩7,000 <span class="yen-price">(約¥750)</span></div>
+                    <div class="time-desc">一日中聖水を探検</div>
+                </div>
+            </div>
+            
+            <p class="time-notice">* 超過時のみ1時間あたり₩1,000 (約¥110) 追加</p>
+        </section>
+
         <!-- Size Selection -->
         <section class="size-section">
             <h2 class="section-title">サイズ選択</h2>
@@ -131,57 +182,6 @@
                         <p class="size-example">20インチキャリー基準</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Time Selection -->
-        <section class="time-section">
-            <h2 class="section-title">ご利用時間選択</h2>
-            <div class="reservation-policy">
-                <div class="policy-item">
-                    <span class="policy-icon">⏱️</span>
-                    <span class="policy-text"><strong>30分以内</strong>の到着推奨（未到着時は自動開始）</span>
-                </div>
-                <div class="policy-item">
-                    <span class="policy-icon">📦</span>
-                    <span class="policy-text">荷物回収時は残り時間に関係なく自動終了</span>
-                </div>
-            </div>
-            
-            <div class="time-cards">
-                <div class="time-card selected" data-hours="4" data-price="4000">
-                    <div class="time-badge">人気</div>
-                    <div class="time-hours">4時間</div>
-                    <div class="time-price">₩4,000 <span class="yen-price">(約¥430)</span></div>
-                    <div class="time-desc">ショッピング後お食事まで</div>
-                </div>
-                
-                <div class="time-card" data-hours="8" data-price="7000">
-                    <div class="time-badge best-value">お得</div>
-                    <div class="time-hours">8時間</div>
-                    <div class="time-price">₩7,000 <span class="yen-price">(約¥750)</span></div>
-                    <div class="time-desc">一日中聖水を探検</div>
-                </div>
-            </div>
-            
-            <p class="time-notice">* 超過時のみ1時間あたり₩1,000 (約¥110) 追加</p>
-        </section>
-
-        <!-- Date/Time Selection -->
-        <section class="datetime-section">
-            <h2 class="section-title">ご利用開始日時</h2>
-            <div class="datetime-picker">
-                <div class="datetime-input-group">
-                    <div class="datetime-label" id="date-picker-btn">
-                        <span class="datetime-icon">📅</span>
-                        <span class="datetime-display" id="date-display">26年1月18日</span>
-                    </div>
-                    <div class="datetime-label" id="time-picker-btn">
-                        <span class="datetime-icon">⏰</span>
-                        <span class="datetime-display" id="time-display">午後1:00</span>
-                    </div>
-                </div>
-                <p class="datetime-notice">* 予約時間から30分以内の到着推奨</p>
             </div>
         </section>
 
