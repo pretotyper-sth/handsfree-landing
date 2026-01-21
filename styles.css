@@ -448,12 +448,10 @@ body {
     background: var(--bg-card);
 }
 
-.time-card.disabled .time-badge {
-    background: #ff6b6b;
-}
-
+.time-card.disabled .time-badge,
 .time-badge.sold-out {
-    background: #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.15) !important;
+    color: #ff6b6b !important;
 }
 
 .time-badge {
