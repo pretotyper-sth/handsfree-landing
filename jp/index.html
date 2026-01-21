@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hands Free | 手ぶらで楽しむ、聖水（ソンス）満喫プラン！</title>
+    <title>HANDS FREE | 聖水 荷物預かり</title>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="HANDS FREE | 聖水 荷物預かり">
+    <meta property="og:description" content="手ぶらで楽しむ、聖水満喫プラン！聖水 24時間 荷物預かりサービス">
+    <meta property="og:image" content="https://handsfree-landing.vercel.app/og-image.jpg">
+    <meta property="og:url" content="https://handsfree-landing.vercel.app/jp/">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="HANDS FREE | 聖水 荷物預かり">
+    <meta name="twitter:description" content="手ぶらで楽しむ、聖水満喫プラン！聖水 24時間 荷物預かりサービス">
+    <meta name="twitter:image" content="https://handsfree-landing.vercel.app/og-image.jpg">
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="apple-touch-icon" href="../favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +63,7 @@
         <!-- Header -->
         <header class="header">
             <div class="logo-text">HANDS FREE</div>
-            <p class="tagline">手ぶらで楽しむ、聖水（ソンス）満喫プラン！</p>
+            <p class="tagline">聖水 24時間 荷物預かりサービス</p>
         </header>
 
         <!-- Map Section -->
@@ -98,47 +111,7 @@
                         <span class="datetime-display" id="time-display">午後1:00</span>
                     </div>
                 </div>
-                <p class="datetime-notice">* 予約時間から30分以内の到着推奨</p>
             </div>
-            
-            <div class="current-time-banner">
-                <span class="time-label">開始</span>
-                <span class="time-value" id="current-time">--:--</span>
-                <span class="time-deadline">未オープン時 <span id="deadline-time">--:--</span>に自動開始</span>
-            </div>
-        </section>
-
-        <!-- Time Selection -->
-        <section class="time-section">
-            <h2 class="section-title">ご利用時間選択</h2>
-            <div class="reservation-policy">
-                <div class="policy-item">
-                    <span class="policy-icon">⏱️</span>
-                    <span class="policy-text"><strong>30分以内</strong>の到着推奨（未オープン時は自動開始）</span>
-                </div>
-                <div class="policy-item">
-                    <span class="policy-icon">📦</span>
-                    <span class="policy-text">荷物回収時は残り時間に関係なく自動終了</span>
-                </div>
-            </div>
-            
-            <div class="time-cards">
-                <div class="time-card selected" data-hours="4" data-price="4000">
-                    <div class="time-badge">人気</div>
-                    <div class="time-hours">4時間</div>
-                    <div class="time-price">₩4,000 <span class="yen-price">(約¥430)</span></div>
-                    <div class="time-desc">ショッピング後お食事まで</div>
-                </div>
-                
-                <div class="time-card" data-hours="8" data-price="7000">
-                    <div class="time-badge best-value">お得</div>
-                    <div class="time-hours">8時間</div>
-                    <div class="time-price">₩7,000 <span class="yen-price">(約¥750)</span></div>
-                    <div class="time-desc">一日中聖水を探検</div>
-                </div>
-            </div>
-            
-            <p class="time-notice">* 超過時のみ1時間あたり₩1,000 (約¥110) 追加</p>
         </section>
 
         <!-- Size Selection -->
@@ -189,6 +162,39 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Time Selection -->
+        <section class="time-section">
+            <h2 class="section-title">ご利用時間選択</h2>
+            <div class="reservation-policy">
+                <div class="policy-item">
+                    <span class="policy-icon">⏱️</span>
+                    <span class="policy-text"><strong>30分以内</strong>の到着推奨（未オープン時は自動開始）</span>
+                </div>
+                <div class="policy-item">
+                    <span class="policy-icon">📦</span>
+                    <span class="policy-text">荷物回収時は残り時間に関係なく自動終了</span>
+                </div>
+            </div>
+            
+            <div class="time-cards">
+                <div class="time-card selected" data-hours="4" data-price="4000">
+                    <div class="time-badge">人気</div>
+                    <div class="time-hours">4時間</div>
+                    <div class="time-price">₩4,000 <span class="yen-price">(約¥430)</span></div>
+                    <div class="time-desc">ショッピング後お食事まで</div>
+                </div>
+                
+                <div class="time-card" data-hours="8" data-price="7000">
+                    <div class="time-badge best-value">お得</div>
+                    <div class="time-hours">8時間</div>
+                    <div class="time-price">₩7,000 <span class="yen-price">(約¥750)</span></div>
+                    <div class="time-desc">一日中聖水を探検</div>
+                </div>
+            </div>
+            
+            <p class="time-notice">* 超過時のみ1時間あたり₩1,000 (約¥110) 追加</p>
         </section>
 
         <!-- Custom Date Picker Modal -->
@@ -245,8 +251,12 @@
                     <span class="summary-value" id="selected-time">4時間</span>
                 </div>
                 <div class="summary-row">
-                    <span>終了予定</span>
-                    <span class="summary-value" id="end-time">--:--</span>
+                    <span>ご利用予定時間</span>
+                    <span class="summary-value" id="usage-time-range">1月21日 午後1:00 ~ 午後5:00</span>
+                </div>
+                <div class="summary-row auto-start-row">
+                    <span></span>
+                    <span class="auto-start-notice" id="auto-start-notice">未オープン時 午後1:30に自動開始</span>
                 </div>
                 <div class="summary-divider"></div>
                 <div class="summary-row total">
@@ -394,6 +404,49 @@
                 const period = h < 12 ? '午前' : '午後';
                 const displayHour = h % 12 || 12;
                 timeDisplay.textContent = `${period}${displayHour}:${minutes}`;
+            }
+        };
+        
+        // 시간 표시 일본어로 변환 (요약 섹션)
+        const formatTimeJP = function(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const period = hours < 12 ? '午前' : '午後';
+            const displayHours = hours % 12 || 12;
+            return `${period}${displayHours}:${minutes}`;
+        };
+        
+        const originalUpdateTimeDisplay = updateTimeDisplay;
+        updateTimeDisplay = function() {
+            let startTime;
+            if (state.selectedDate && state.selectedTime) {
+                startTime = new Date(`${state.selectedDate}T${state.selectedTime}`);
+            } else {
+                startTime = new Date();
+            }
+            
+            const startTimeStr = formatTimeJP(startTime);
+            
+            const deadline = new Date(startTime.getTime() + CONFIG.arrivalBuffer * 60000);
+            const deadlineStr = formatTimeJP(deadline);
+            
+            const endTime = new Date(startTime.getTime() + state.selectedHours * 60 * 60000);
+            const endTimeStr = formatTimeJP(endTime);
+            
+            // 날짜 포맷 (1月21日)
+            const month = startTime.getMonth() + 1;
+            const day = startTime.getDate();
+            const dateStr = `${month}月${day}日`;
+            
+            // 요약 섹션 요소 업데이트
+            const usageTimeRange = document.getElementById('usage-time-range');
+            const autoStartNotice = document.getElementById('auto-start-notice');
+            
+            if (usageTimeRange) {
+                usageTimeRange.textContent = `${dateStr} ${startTimeStr} ~ ${endTimeStr}`;
+            }
+            if (autoStartNotice) {
+                autoStartNotice.textContent = `未オープン時 ${deadlineStr}に自動開始`;
             }
         };
         

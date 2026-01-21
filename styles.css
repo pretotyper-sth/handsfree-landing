@@ -268,6 +268,11 @@ body {
     background: var(--bg-card-hover);
 }
 
+.size-card.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 .size-header {
     display: flex;
     flex-direction: column;
@@ -295,6 +300,11 @@ body {
 .size-available.limited {
     color: var(--warning);
     background: rgba(240, 198, 116, 0.15);
+}
+
+.size-available.sold-out {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.15);
 }
 
 .size-visual {
@@ -429,6 +439,17 @@ body {
 .time-card.selected {
     border-color: var(--text-primary);
     background: var(--bg-card-hover);
+}
+
+.time-card.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    border-color: var(--border-color);
+    background: var(--bg-card);
+}
+
+.time-card.disabled .time-badge {
+    background: var(--text-muted);
 }
 
 .time-badge {
@@ -738,6 +759,22 @@ body {
 .summary-value {
     color: var(--text-primary);
     font-weight: 500;
+}
+
+/* 자동 시작 안내 (태그 스타일 - 칸 남음과 동일) */
+.summary-row.auto-start-row {
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.auto-start-notice {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--success);
+    background: rgba(125, 211, 168, 0.15);
+    white-space: nowrap;
 }
 
 .summary-divider {

@@ -460,6 +460,9 @@ function initSizeSelection() {
     
     sizeCards.forEach(card => {
         card.addEventListener('click', () => {
+            // disabled 상태면 클릭 무시
+            if (card.classList.contains('disabled')) return;
+            
             sizeCards.forEach(c => {
                 c.classList.remove('selected');
                 const badge = c.querySelector('.selected-badge');
@@ -474,6 +477,10 @@ function initSizeSelection() {
             
             const prevSize = state.selectedSize;
             state.selectedSize = card.dataset.size;
+            
+            // 시간 카드 활성화/비활성화 업데이트 (8시간이 안 되면 4시간으로 변경)
+            updateTimeCardAvailability();
+            
             updatePrice();
             updateSummary();
             
@@ -492,6 +499,9 @@ function initTimeSelection() {
     
     timeCards.forEach(card => {
         card.addEventListener('click', () => {
+            // disabled 상태면 클릭 무시
+            if (card.classList.contains('disabled')) return;
+            
             timeCards.forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             
@@ -499,6 +509,7 @@ function initTimeSelection() {
             state.selectedHours = parseInt(card.dataset.hours);
             updatePrice();
             updateSummary();
+            updateAvailability();
             
             Analytics.track('time_selected', {
                 hours: state.selectedHours,
@@ -506,6 +517,75 @@ function initTimeSelection() {
                 price: state.selectedPrice
             });
         });
+    });
+}
+
+// ===== Availability Update (시간별 남은 칸 수) =====
+// 4시간 기준 남은 칸 수
+const BASE_AVAILABILITY_4H = { S: 3, M: 5, L: 1 };
+// 8시간 기준 남은 칸 수
+const BASE_AVAILABILITY_8H = { S: 2, M: 4, L: 0 };
+
+function getAvailability(size, hours) {
+    return hours === 8 ? BASE_AVAILABILITY_8H[size] : BASE_AVAILABILITY_4H[size];
+}
+
+function updateAvailability() {
+    const sizeCards = document.querySelectorAll('.size-card');
+    const isJapanese = document.documentElement.lang === 'ja';
+    
+    sizeCards.forEach(card => {
+        const size = card.dataset.size;
+        const availableCount = getAvailability(size, state.selectedHours);
+        
+        const availableEl = card.querySelector('.size-available');
+        if (availableEl) {
+            if (availableCount === 0) {
+                availableEl.textContent = isJapanese ? '満室' : '마감';
+                availableEl.classList.remove('limited');
+                availableEl.classList.add('sold-out');
+                card.classList.add('disabled');
+            } else if (availableCount === 1) {
+                availableEl.textContent = isJapanese ? '残り1つ' : '1칸 남음';
+                availableEl.classList.add('limited');
+                availableEl.classList.remove('sold-out');
+                card.classList.remove('disabled');
+            } else {
+                availableEl.textContent = isJapanese ? `残り${availableCount}つ` : `${availableCount}칸 남음`;
+                availableEl.classList.remove('limited', 'sold-out');
+                card.classList.remove('disabled');
+            }
+        }
+    });
+    
+    // 시간 카드 활성화/비활성화 업데이트
+    updateTimeCardAvailability();
+}
+
+function updateTimeCardAvailability() {
+    const timeCards = document.querySelectorAll('.time-card');
+    const isJapanese = document.documentElement.lang === 'ja';
+    
+    timeCards.forEach(card => {
+        const hours = parseInt(card.dataset.hours);
+        const availableCount = getAvailability(state.selectedSize, hours);
+        
+        if (availableCount === 0) {
+            card.classList.add('disabled');
+            // 비활성화된 카드가 선택되어 있으면 4시간으로 변경
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                const fourHourCard = document.querySelector('.time-card[data-hours="4"]');
+                if (fourHourCard) {
+                    fourHourCard.classList.add('selected');
+                    state.selectedHours = 4;
+                    updatePrice();
+                    updateSummary();
+                }
+            }
+        } else {
+            card.classList.remove('disabled');
+        }
     });
 }
 
@@ -872,7 +952,7 @@ function updateTimeDisplay() {
         startTime = new Date();
     }
     
-    const currentTimeStr = formatTime(startTime);
+    const startTimeStr = formatTime(startTime);
     
     const deadline = new Date(startTime.getTime() + CONFIG.arrivalBuffer * 60000);
     const deadlineStr = formatTime(deadline);
@@ -880,9 +960,30 @@ function updateTimeDisplay() {
     const endTime = new Date(startTime.getTime() + state.selectedHours * 60 * 60000);
     const endTimeStr = formatTime(endTime);
     
-    document.getElementById('current-time').textContent = currentTimeStr;
-    document.getElementById('deadline-time').textContent = deadlineStr;
-    document.getElementById('end-time').textContent = endTimeStr;
+    // 날짜 포맷 (1월 21일)
+    const month = startTime.getMonth() + 1;
+    const day = startTime.getDate();
+    const dateStr = `${month}월 ${day}일`;
+    
+    // 새로운 요약 섹션 요소 업데이트
+    const usageTimeRange = document.getElementById('usage-time-range');
+    const autoStartNotice = document.getElementById('auto-start-notice');
+    
+    if (usageTimeRange) {
+        usageTimeRange.textContent = `${dateStr} ${startTimeStr} ~ ${endTimeStr}`;
+    }
+    if (autoStartNotice) {
+        autoStartNotice.textContent = `미오픈 시 ${deadlineStr}에 자동 시작`;
+    }
+    
+    // 기존 요소 (호환성)
+    const currentTimeEl = document.getElementById('current-time');
+    const deadlineTimeEl = document.getElementById('deadline-time');
+    const endTimeEl = document.getElementById('end-time');
+    
+    if (currentTimeEl) currentTimeEl.textContent = startTimeStr;
+    if (deadlineTimeEl) deadlineTimeEl.textContent = deadlineStr;
+    if (endTimeEl) endTimeEl.textContent = endTimeStr;
 }
 
 function formatTime(date) {

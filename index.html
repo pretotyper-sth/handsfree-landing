@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hands Free | 손은 가볍게, 성수는 알차게</title>
+    <title>HANDS FREE | 성수 물품 보관</title>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="HANDS FREE | 성수 물품 보관">
+    <meta property="og:description" content="손은 가볍게, 성수는 알차게. 성수 24시 물품 보관소">
+    <meta property="og:image" content="https://handsfree-landing.vercel.app/og-image.jpg">
+    <meta property="og:url" content="https://handsfree-landing.vercel.app">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="HANDS FREE | 성수 물품 보관">
+    <meta name="twitter:description" content="손은 가볍게, 성수는 알차게. 성수 24시 물품 보관소">
+    <meta name="twitter:image" content="https://handsfree-landing.vercel.app/og-image.jpg">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +43,7 @@
         <!-- Header -->
         <header class="header">
             <div class="logo-text">HANDS FREE</div>
-            <p class="tagline">손은 가볍게, 성수는 알차게</p>
+            <p class="tagline">성수 24시 물품 보관소</p>
         </header>
 
         <!-- Map Section -->
@@ -78,47 +91,7 @@
                         <span class="datetime-display" id="time-display">오후 1:00</span>
                     </div>
                 </div>
-                <p class="datetime-notice">* 예약 시간 기준 30분 내 도착 권장</p>
             </div>
-            
-            <div class="current-time-banner">
-                <span class="time-label">시작</span>
-                <span class="time-value" id="current-time">--:--</span>
-                <span class="time-deadline">미오픈 시 <span id="deadline-time">--:--</span>에 자동 시작</span>
-            </div>
-        </section>
-
-        <!-- Time Selection -->
-        <section class="time-section">
-            <h2 class="section-title">이용 시간 선택</h2>
-            <div class="reservation-policy">
-                <div class="policy-item">
-                    <span class="policy-icon">⏱️</span>
-                    <span class="policy-text"><strong>30분 내</strong> 도착 권장 (미오픈 시 자동 시작)</span>
-                </div>
-                <div class="policy-item">
-                    <span class="policy-icon">📦</span>
-                    <span class="policy-text">짐 회수 시 남은 시간과 상관없이 자동 종료</span>
-                </div>
-            </div>
-            
-            <div class="time-cards">
-                <div class="time-card selected" data-hours="4" data-price="4000">
-                    <div class="time-badge">인기</div>
-                    <div class="time-hours">4시간</div>
-                    <div class="time-price">₩4,000</div>
-                    <div class="time-desc">쇼핑 후 식사까지</div>
-                </div>
-                
-                <div class="time-card" data-hours="8" data-price="7000">
-                    <div class="time-badge best-value">최저가</div>
-                    <div class="time-hours">8시간</div>
-                    <div class="time-price">₩7,000</div>
-                    <div class="time-desc">하루 종일 성수 탐험</div>
-                </div>
-            </div>
-            
-            <p class="time-notice">* 시간 초과 시에만 시간당 ₩1,000 추가</p>
         </section>
 
         <!-- Size Selection -->
@@ -169,6 +142,39 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Time Selection -->
+        <section class="time-section">
+            <h2 class="section-title">이용 시간 선택</h2>
+            <div class="reservation-policy">
+                <div class="policy-item">
+                    <span class="policy-icon">⏱️</span>
+                    <span class="policy-text"><strong>30분 내</strong> 도착 권장 (미오픈 시 자동 시작)</span>
+                </div>
+                <div class="policy-item">
+                    <span class="policy-icon">📦</span>
+                    <span class="policy-text">짐 회수 시 남은 시간과 상관없이 자동 종료</span>
+                </div>
+            </div>
+            
+            <div class="time-cards">
+                <div class="time-card selected" data-hours="4" data-price="4000">
+                    <div class="time-badge">인기</div>
+                    <div class="time-hours">4시간</div>
+                    <div class="time-price">₩4,000</div>
+                    <div class="time-desc">쇼핑 후 식사까지</div>
+                </div>
+                
+                <div class="time-card" data-hours="8" data-price="7000">
+                    <div class="time-badge best-value">최저가</div>
+                    <div class="time-hours">8시간</div>
+                    <div class="time-price">₩7,000</div>
+                    <div class="time-desc">하루 종일 성수 탐험</div>
+                </div>
+            </div>
+            
+            <p class="time-notice">* 시간 초과 시에만 시간당 ₩1,000 추가</p>
         </section>
 
         <!-- Custom Date Picker Modal -->
@@ -225,8 +231,12 @@
                     <span class="summary-value" id="selected-time">4시간</span>
                 </div>
                 <div class="summary-row">
-                    <span>예상 종료</span>
-                    <span class="summary-value" id="end-time">--:--</span>
+                    <span>예상 사용 시간</span>
+                    <span class="summary-value" id="usage-time-range">1월 21일 오후 1:00 ~ 오후 5:00</span>
+                </div>
+                <div class="summary-row auto-start-row">
+                    <span></span>
+                    <span class="auto-start-notice" id="auto-start-notice">미오픈 시 오후 1:30에 자동 시작</span>
                 </div>
                 <div class="summary-divider"></div>
                 <div class="summary-row total">
