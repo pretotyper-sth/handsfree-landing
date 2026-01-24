@@ -190,7 +190,8 @@ function initHeroCTA() {
                 setTimeout(() => {
                     const tag = document.createElement('span');
                     tag.className = 'start-here-tag';
-                    tag.textContent = '여기부터 시작';
+                    const isJapanese = window.location.pathname.includes('/jp');
+                    tag.textContent = isJapanese ? 'ここからスタート' : '여기부터 시작';
                     sectionTitle.appendChild(tag);
                     
                     // 애니메이션 완료 후 태그 제거
