@@ -1,14 +1,15 @@
 // ===== Configuration =====
 const CONFIG = {
     destination: {
-        lat: 37.5448,
-        lng: 127.0568,
+        lat: 37.5453,
+        lng: 127.0573,
         name: '연무장길 81-1, 2층',
         fullAddress: '서울 성동구 연무장길 81-1, 2층'
     },
     defaultLocation: {
-        lat: 37.5462,
-        lng: 127.0553
+        // 성수역 (위치 허용 안 할 때 기본값)
+        lat: 37.5445,
+        lng: 127.0556
     },
     mapStyle: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     arrivalBuffer: 30
@@ -28,6 +29,7 @@ let state = {
     selectedDate: null,  // 선택된 날짜
     selectedTime: null,  // 선택된 시간
     userLocation: null,
+    isDefaultLocation: false,  // 기본 위치(성수역) 사용 여부
     map: null,
     currentMarker: null,
     routeLayer: null,
@@ -81,27 +83,227 @@ function generateSessionId() {
 
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
-    // 페이지 로드 트래킹
+    // 재방문자 체크
+    const isReturning = checkReturningUser();
+    
+    // 페이지 로드 트래킹 (재방문 여부 포함)
     Analytics.track('page_view', {
         referrer: document.referrer,
         userAgent: navigator.userAgent,
         screenWidth: window.innerWidth,
         screenHeight: window.innerHeight,
-        language: navigator.language
+        language: navigator.language,
+        isReturning: isReturning,
+        visitCount: getVisitCount()
     });
     
     initMap();
-    initGeolocation();
+    initLocationModal(); // 위치 권한 모달 초기화 (즉시 요청 대신)
     initSizeSelection();
     initTimeSelection();
     initDateTimePicker();
     initReserveButton();
+    initHeroCTA(); // First Fold CTA 초기화
     initErrorModal();
     initTimeDisplay();
     initCopyAddress();
     initScrollTracking();
+    initSocialProof(); // 소셜 프루프 초기화
+    initLanguageDropdown(); // 언어 드롭다운 초기화
     updatePrice();
 });
+
+// ===== Returning User Check =====
+function checkReturningUser() {
+    const visitKey = 'hf_visited';
+    const countKey = 'hf_visit_count';
+    const lastVisit = localStorage.getItem(visitKey);
+    const isReturning = !!lastVisit;
+    
+    // 방문 횟수 증가
+    let visitCount = parseInt(localStorage.getItem(countKey) || '0') + 1;
+    localStorage.setItem(countKey, visitCount.toString());
+    
+    // 현재 방문 시간 기록
+    localStorage.setItem(visitKey, Date.now().toString());
+    
+    return isReturning;
+}
+
+function getVisitCount() {
+    return parseInt(localStorage.getItem('hf_visit_count') || '1');
+}
+
+// ===== Social Proof =====
+function initSocialProof() {
+    // 고정값 21명 사용 (요청에 따라)
+    // 동적으로 하려면 아래 주석 해제
+    // const todayUsersEl = document.getElementById('today-users');
+    // if (!todayUsersEl) return;
+    // const baseCount = 18;
+    // const randomAdd = Math.floor(Math.random() * 8); // 0-7
+    // const todayCount = baseCount + randomAdd;
+    // todayUsersEl.innerHTML = `오늘 <strong>${todayCount}</strong>명 이용 중`;
+}
+
+// ===== Language Dropdown =====
+function initLanguageDropdown() {
+    const dropdown = document.getElementById('language-dropdown');
+    const btn = document.getElementById('language-btn');
+    
+    if (!dropdown || !btn) return;
+    
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+    });
+    
+    // 외부 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) {
+            dropdown.classList.remove('active');
+        }
+    });
+}
+
+// ===== Hero CTA (First Fold) =====
+function initHeroCTA() {
+    const heroBtn = document.getElementById('hero-reserve-btn');
+    if (!heroBtn) return;
+    
+    heroBtn.addEventListener('click', () => {
+        Analytics.track('hero_cta_click');
+        
+        // 사이즈 선택 섹션으로 부드럽게 스크롤
+        const sizeSection = document.querySelector('.size-section');
+        if (sizeSection) {
+            sizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+}
+
+// ===== Location Permission Modal =====
+function initLocationModal() {
+    const locationModal = document.getElementById('location-modal');
+    const allowBtn = document.getElementById('allow-location-btn');
+    const skipBtn = document.getElementById('skip-location-btn');
+    const mapContainer = document.getElementById('map-container');
+    
+    if (!locationModal || !allowBtn || !skipBtn) {
+        // 모달이 없으면 기존 방식으로 진행
+        initGeolocationDelayed();
+        return;
+    }
+    
+    let modalShown = false;
+    
+    const showLocationModal = () => {
+        if (modalShown) return;
+        modalShown = true;
+        locationModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        Analytics.track('location_modal_shown');
+    };
+    
+    // 지도가 화면 중앙에 위치했을 때 모달 표시 (Intersection Observer)
+    if (mapContainer) {
+        const mapObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // 지도가 50% 이상 보이고, 아직 모달을 안 띄웠으면 표시
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                    // 약간의 딜레이 후 모달 표시 (자연스럽게)
+                    setTimeout(showLocationModal, 500);
+                    mapObserver.disconnect(); // 한 번만 실행
+                }
+            });
+        }, {
+            threshold: 0.5 // 50% 이상 보일 때
+        });
+        
+        mapObserver.observe(mapContainer);
+    }
+    
+    // 위치 허용 버튼
+    allowBtn.addEventListener('click', () => {
+        locationModal.classList.remove('active');
+        document.body.style.overflow = '';
+        Analytics.track('location_permission', { action: 'allow' });
+        requestGeolocation();
+    });
+    
+    // 건너뛰기 버튼
+    skipBtn.addEventListener('click', () => {
+        locationModal.classList.remove('active');
+        document.body.style.overflow = '';
+        Analytics.track('location_permission', { action: 'skip' });
+        useDefaultLocation();
+    });
+    
+    // 모달 배경 클릭 시 닫기
+    locationModal.addEventListener('click', (e) => {
+        if (e.target === locationModal) {
+            locationModal.classList.remove('active');
+            document.body.style.overflow = '';
+            Analytics.track('location_permission', { action: 'backdrop_close' });
+            useDefaultLocation();
+        }
+    });
+}
+
+function initGeolocationDelayed() {
+    // 모달 없이 3초 후 위치 요청
+    setTimeout(() => {
+        requestGeolocation();
+    }, 3000);
+}
+
+function requestGeolocation() {
+    if (!navigator.geolocation) {
+        console.log('[Hands Free] Geolocation not supported');
+        Analytics.track('geolocation_result', { success: false, reason: 'not_supported' });
+        useDefaultLocation();
+        return;
+    }
+    
+    console.log('[Hands Free] Requesting geolocation...');
+    
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            state.userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            state.isDefaultLocation = false;
+            
+            console.log('[Hands Free] Location received:', state.userLocation);
+            console.log('[Hands Free] Accuracy:', position.coords.accuracy, 'm');
+            
+            Analytics.track('geolocation_result', {
+                success: true,
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                accuracy: position.coords.accuracy
+            });
+            
+            updateMapWithUserLocation();
+            fetchWalkingRoute();
+        },
+        (error) => {
+            console.log('[Hands Free] Geolocation error:', error.message);
+            Analytics.track('geolocation_result', { 
+                success: false,
+                reason: error.message,
+                code: error.code 
+            });
+            useDefaultLocation();
+        },
+        { 
+            enableHighAccuracy: true, 
+            timeout: 15000, 
+            maximumAge: 0
+        }
+    );
+}
 
 // ===== Scroll Tracking =====
 function initScrollTracking() {
@@ -125,69 +327,17 @@ function initScrollTracking() {
         }
     });
     
-    // 페이지 이탈 시 최종 스크롤 깊이 기록
-    window.addEventListener('beforeunload', () => {
-        Analytics.track('session_end', {
-            maxScrollDepth: maxScroll,
-            totalTimeOnPage: Math.round((Date.now() - state.pageLoadTime) / 1000),
-            selectedSize: state.selectedSize,
-            selectedHours: state.selectedHours,
-            reserveAttempts: state.reserveClickCount
-        });
-    });
+    // session_end 제거 - beforeunload는 신뢰도가 낮음 (브라우저가 종종 차단)
+    // GA4의 session_start와 engagement_time으로 대체 가능
 }
 
 // ===== Geolocation =====
-function initGeolocation() {
-    if (!navigator.geolocation) {
-        console.log('[Hands Free] Geolocation not supported');
-        Analytics.track('geolocation_error', { reason: 'not_supported' });
-        useDefaultLocation();
-        return;
-    }
-    
-    console.log('[Hands Free] Requesting geolocation...');
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            state.userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            
-            console.log('[Hands Free] Location received:', state.userLocation);
-            console.log('[Hands Free] Accuracy:', position.coords.accuracy, 'm');
-            
-            Analytics.track('geolocation_success', {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                accuracy: position.coords.accuracy
-            });
-            
-            updateMapWithUserLocation();
-            fetchWalkingRoute();
-        },
-        (error) => {
-            console.log('[Hands Free] Geolocation error:', error.message);
-            Analytics.track('geolocation_error', { 
-                reason: error.message,
-                code: error.code 
-            });
-            useDefaultLocation();
-        },
-        { 
-            enableHighAccuracy: true, 
-            timeout: 15000, 
-            maximumAge: 0
-        }
-    );
-}
-
 function useDefaultLocation() {
     state.userLocation = {
         lat: CONFIG.defaultLocation.lat,
         lng: CONFIG.defaultLocation.lng
     };
+    state.isDefaultLocation = true;
     updateMapWithUserLocation();
     fetchWalkingRoute();
 }
@@ -196,8 +346,27 @@ function updateMapWithUserLocation() {
     if (!state.map || !state.userLocation) return;
     
     if (state.currentMarker) {
-        state.currentMarker.setLatLng([state.userLocation.lat, state.userLocation.lng]);
+        state.map.removeLayer(state.currentMarker);
     }
+    
+    // 기본 위치(성수역)일 때는 지하철 아이콘, 실제 위치일 때는 민트색 원
+    const markerIcon = state.isDefaultLocation 
+        ? L.divIcon({
+            className: 'custom-marker',
+            html: '<div class="marker-station">🚉</div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 14]
+        })
+        : L.divIcon({
+            className: 'custom-marker',
+            html: '<div class="marker-current"></div>',
+            iconSize: [17, 17],
+            iconAnchor: [8.5, 8.5]
+        });
+    
+    state.currentMarker = L.marker([state.userLocation.lat, state.userLocation.lng], {
+        icon: markerIcon
+    }).addTo(state.map);
     
     const bounds = L.latLngBounds([
         [state.userLocation.lat, state.userLocation.lng],
@@ -257,7 +426,9 @@ async function fetchWalkingRoute() {
             const durationMin = Math.ceil(distanceM / 80);
             
             console.log('[Hands Free] Route calculated:', distanceM, 'm,', durationMin, 'min (walking speed: 80m/min)');
-            document.getElementById('walk-time').querySelector('span').textContent = `도보 ${durationMin}분`;
+            // 기본 위치(성수역)일 때는 6분 고정, 실제 위치일 때는 계산값 사용
+            const displayMin = state.isDefaultLocation ? 6 : durationMin;
+            document.getElementById('walk-time').querySelector('span').textContent = `도보 ${displayMin}분`;
             
             Analytics.track('route_calculated', {
                 durationMin,
@@ -320,7 +491,9 @@ function updateDistanceFallback() {
     const walkingMinutes = Math.max(1, Math.ceil(walkingDistance / 80));
     
     console.log('[Hands Free] Fallback calculation:', walkingDistance, 'm,', walkingMinutes, 'min');
-    document.getElementById('walk-time').querySelector('span').textContent = `도보 약 ${walkingMinutes}분`;
+    // 기본 위치(성수역)일 때는 6분 고정
+    const displayMin = state.isDefaultLocation ? 6 : walkingMinutes;
+    document.getElementById('walk-time').querySelector('span').textContent = state.isDefaultLocation ? `도보 ${displayMin}분` : `도보 약 ${displayMin}분`;
     
     Analytics.track('route_calculated', {
         durationMin: walkingMinutes,
@@ -344,22 +517,24 @@ function drawFallbackRoute() {
     if (state.routeLayer) state.map.removeLayer(state.routeLayer);
     if (state.routeGlow) state.map.removeLayer(state.routeGlow);
     
+    // 실선 경로 (위치 허용했을 때와 동일한 스타일)
     state.routeGlow = L.polyline(latLngs, {
         color: '#ffffff',
-        weight: 6,
-        opacity: 0.15,
+        weight: 8,
+        opacity: 0.2,
         lineCap: 'round',
-        dashArray: '8, 12'
+        lineJoin: 'round'
     }).addTo(state.map);
     
     state.routeLayer = L.polyline(latLngs, {
         color: '#ffffff',
-        weight: 3,
-        opacity: 0.6,
+        weight: 4,
+        opacity: 0.9,
         lineCap: 'round',
-        dashArray: '8, 12'
+        lineJoin: 'round'
     }).addTo(state.map);
 }
+
 
 function calculateDistance(lat1, lng1, lat2, lng2) {
     const R = 6371000;
@@ -394,8 +569,8 @@ function initMap() {
     const currentIcon = L.divIcon({
         className: 'custom-marker',
         html: '<div class="marker-current"></div>',
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
+        iconSize: [17, 17],
+        iconAnchor: [8.5, 8.5]
     });
 
     // 일본어 페이지인 경우 경로 조정
@@ -761,8 +936,9 @@ function initCustomDatePicker() {
             updateDateTimeDisplay();
             updateTimeDisplay();
             
-            Analytics.track('date_selected', {
-                date: state.selectedDate,
+            Analytics.track('datetime_selected', {
+                type: 'date',
+                value: state.selectedDate,
                 isToday: state.selectedDate === formatDateValue(new Date())
             });
         }
@@ -861,8 +1037,9 @@ function initCustomTimePicker() {
             updateDateTimeDisplay();
             updateTimeDisplay();
             
-            Analytics.track('time_input_selected', {
-                time: state.selectedTime
+            Analytics.track('datetime_selected', {
+                type: 'time',
+                value: state.selectedTime
             });
         }
         
@@ -1054,13 +1231,13 @@ function initErrorModal() {
     });
     
     closeBtn.addEventListener('click', () => {
-        Analytics.track('modal_close');
+        Analytics.track('modal_close', { method: 'button' });
         hideErrorModal();
     });
     
     errorModal.addEventListener('click', (e) => {
         if (e.target === errorModal) {
-            Analytics.track('modal_backdrop_close');
+            Analytics.track('modal_close', { method: 'backdrop' });
             hideErrorModal();
         }
     });

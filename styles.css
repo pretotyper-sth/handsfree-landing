@@ -72,12 +72,20 @@ body {
 
 /* ===== Header ===== */
 .header {
-    padding: 28px 0 20px;
-    text-align: center;
+    padding: 24px 0 16px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.header-left {
+    text-align: left;
 }
 
 .logo-text {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: 1px;
@@ -87,7 +95,101 @@ body {
     font-size: 13px;
     font-weight: 400;
     color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+/* Language Dropdown */
+.language-dropdown {
+    position: relative;
+}
+
+.language-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-primary);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    margin-top: 2px;
+}
+
+.language-btn:hover {
+    color: var(--text-primary);
+    background: var(--accent-soft);
+}
+
+.lang-flag {
+    font-size: 14px;
+}
+
+.lang-text {
+    font-weight: 500;
+}
+
+.lang-arrow {
+    font-size: 10px;
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.language-dropdown.active .lang-arrow {
+    transform: rotate(180deg);
+}
+
+.language-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
     margin-top: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    min-width: 120px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+}
+
+.language-dropdown.active .language-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.language-option:hover {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+}
+
+.language-option.active {
+    color: var(--text-primary);
+    background: rgba(125, 211, 168, 0.1);
+}
+
+.language-option .lang-flag {
+    font-size: 16px;
 }
 
 /* ===== Section Titles ===== */
@@ -96,6 +198,79 @@ body {
     font-weight: 600;
     margin-bottom: 12px;
     color: var(--text-primary);
+}
+
+/* ===== Hero Section (First Fold CTA) ===== */
+.hero-section {
+    padding: 20px 0 36px;
+    margin-bottom: 12px;
+}
+
+.hero-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.hero-tagline {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+    flex: 1;
+}
+
+.hero-cta-small {
+    flex-shrink: 0;
+    background: var(--success);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 14px;
+    padding: 6px 12px;
+    font-family: var(--font-primary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.hero-cta-small:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(125, 211, 168, 0.3);
+}
+
+.hero-cta-small:active {
+    transform: scale(0.98);
+}
+
+.hero-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.hero-stat strong {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.hero-divider {
+    color: var(--text-muted);
+}
+
+/* ===== Location Modal ===== */
+.location-modal-content {
+    max-width: 300px;
+}
+
+.modal-icon.location {
+    background: rgba(125, 211, 168, 0.15);
+    font-size: 28px;
 }
 
 /* ===== Map Section - Uber Style ===== */
@@ -154,7 +329,7 @@ body {
 #map {
     width: 100%;
     height: 100%;
-    filter: saturate(0.8) brightness(0.95) contrast(1.05);
+    filter: saturate(0.9) brightness(1.35) contrast(1.0);
 }
 
 .leaflet-control-zoom,
@@ -1001,12 +1176,25 @@ body {
 }
 
 .marker-current {
-    width: 14px;
-    height: 14px;
+    width: 17px;
+    height: 17px;
     background: var(--success);
     border: 3px solid white;
     border-radius: 50%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.marker-station {
+    width: 20px;
+    height: 20px;
+    background: var(--bg-card);
+    border: 2px solid var(--text-primary);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .marker-destination-wrap {

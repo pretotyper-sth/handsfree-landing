@@ -62,9 +62,43 @@
     <div class="app-container" id="app-container">
         <!-- Header -->
         <header class="header">
-            <div class="logo-text">HANDS FREE</div>
-            <p class="tagline">聖水 24時間 荷物預かりサービス</p>
+            <div class="header-left">
+                <div class="logo-text">HANDS FREE</div>
+                <p class="tagline">聖水 24時間 荷物預かり</p>
+            </div>
+            <div class="header-right">
+                <div class="language-dropdown" id="language-dropdown">
+                    <button class="language-btn" id="language-btn">
+                        <span class="lang-flag">🇯🇵</span>
+                        <span class="lang-text">日本語</span>
+                        <span class="lang-arrow">▾</span>
+                    </button>
+                    <div class="language-menu" id="language-menu">
+                        <a href="../index.html" class="language-option">
+                            <span class="lang-flag">🇰🇷</span>
+                            <span>한국어</span>
+                        </a>
+                        <a href="index.html" class="language-option active">
+                            <span class="lang-flag">🇯🇵</span>
+                            <span>日本語</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-main">
+                <p class="hero-tagline">手ぶらで聖水を満喫しよう</p>
+                <button class="hero-cta-small" id="hero-reserve-btn">予約する</button>
+            </div>
+            <div class="hero-stats">
+                <span class="hero-stat" id="today-users">本日 <strong>21</strong>名ご利用中</span>
+                <span class="hero-divider">•</span>
+                <span class="hero-stat">¥430〜</span>
+            </div>
+        </section>
 
         <!-- Map Section -->
         <section class="map-section">
@@ -278,6 +312,17 @@
             <p>© 2026 Hands Free. All rights reserved.</p>
             <p>Seoul, Seongsu</p>
         </footer>
+    </div>
+
+    <!-- Location Permission Modal -->
+    <div class="modal-overlay" id="location-modal">
+        <div class="modal-content location-modal-content">
+            <div class="modal-icon location">📍</div>
+            <h3 class="modal-title">現在地を確認しますか？</h3>
+            <p class="modal-desc">位置情報を許可すると、お店までの<br><strong>徒歩時間を計算</strong>できます</p>
+            <button class="modal-btn primary" id="allow-location-btn">位置情報を許可</button>
+            <button class="modal-btn secondary" id="skip-location-btn">後で設定する</button>
+        </div>
     </div>
 
     <!-- Error Modal (First click) -->

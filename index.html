@@ -42,9 +42,43 @@
     <div class="app-container" id="app-container">
         <!-- Header -->
         <header class="header">
-            <div class="logo-text">HANDS FREE</div>
-            <p class="tagline">성수 24시 물품 보관소</p>
+            <div class="header-left">
+                <div class="logo-text">HANDS FREE</div>
+                <p class="tagline">성수 24시 물품 보관소</p>
+            </div>
+            <div class="header-right">
+                <div class="language-dropdown" id="language-dropdown">
+                    <button class="language-btn" id="language-btn">
+                        <span class="lang-flag">🇰🇷</span>
+                        <span class="lang-text">한국어</span>
+                        <span class="lang-arrow">▾</span>
+                    </button>
+                    <div class="language-menu" id="language-menu">
+                        <a href="index.html" class="language-option active">
+                            <span class="lang-flag">🇰🇷</span>
+                            <span>한국어</span>
+                        </a>
+                        <a href="jp/index.html" class="language-option">
+                            <span class="lang-flag">🇯🇵</span>
+                            <span>日本語</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-main">
+                <p class="hero-tagline">짐을 맡기고 자유롭게 성수를 즐기세요</p>
+                <button class="hero-cta-small" id="hero-reserve-btn">예약하기</button>
+            </div>
+            <div class="hero-stats">
+                <span class="hero-stat" id="today-users">오늘 <strong>21</strong>명 이용 중</span>
+                <span class="hero-divider">•</span>
+                <span class="hero-stat">4,000원부터</span>
+            </div>
+        </section>
 
         <!-- Map Section -->
         <section class="map-section">
@@ -258,6 +292,17 @@
             <p>© 2026 Hands Free. All rights reserved.</p>
             <p>Seoul, Seongsu</p>
         </footer>
+    </div>
+
+    <!-- Location Permission Modal -->
+    <div class="modal-overlay" id="location-modal">
+        <div class="modal-content location-modal-content">
+            <div class="modal-icon location">📍</div>
+            <h3 class="modal-title">현재 위치를 확인할까요?</h3>
+            <p class="modal-desc">위치를 허용하면 매장까지<br><strong>도보 시간을 계산</strong>해드려요</p>
+            <button class="modal-btn primary" id="allow-location-btn">위치 허용하기</button>
+            <button class="modal-btn secondary" id="skip-location-btn">나중에 하기</button>
+        </div>
     </div>
 
     <!-- Error Modal (First click) -->
