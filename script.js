@@ -174,10 +174,31 @@ function initHeroCTA() {
     heroBtn.addEventListener('click', () => {
         Analytics.track('hero_cta_click');
         
-        // 사이즈 선택 섹션으로 부드럽게 스크롤
-        const sizeSection = document.querySelector('.size-section');
-        if (sizeSection) {
-            sizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // 이용 시작 일시 섹션으로 부드럽게 스크롤 (상단 1/5 위치)
+        const datetimeSection = document.querySelector('.datetime-section');
+        if (datetimeSection) {
+            const elementTop = datetimeSection.getBoundingClientRect().top + window.scrollY;
+            const offset = window.innerHeight / 5; // 화면 상단 1/5 지점
+            window.scrollTo({
+                top: elementTop - offset,
+                behavior: 'smooth'
+            });
+            
+            // 이용 시작 일시 타이틀 옆에 '여기부터 시작' 태그 표시
+            const sectionTitle = datetimeSection.querySelector('.section-title');
+            if (sectionTitle && !sectionTitle.querySelector('.start-here-tag')) {
+                setTimeout(() => {
+                    const tag = document.createElement('span');
+                    tag.className = 'start-here-tag';
+                    tag.textContent = '여기부터 시작';
+                    sectionTitle.appendChild(tag);
+                    
+                    // 애니메이션 완료 후 태그 제거
+                    setTimeout(() => {
+                        tag.remove();
+                    }, 2600);
+                }, 500); // 스크롤 완료 후 태그 표시
+            }
         }
     });
 }
@@ -188,6 +209,13 @@ function initLocationModal() {
     const allowBtn = document.getElementById('allow-location-btn');
     const skipBtn = document.getElementById('skip-location-btn');
     const mapContainer = document.getElementById('map-container');
+    
+    // 이전에 위치 허용한 적 있으면 바로 위치 요청
+    const locationPermission = localStorage.getItem('hf_location_permission');
+    if (locationPermission === 'allowed') {
+        requestGeolocation();
+        return;
+    }
     
     if (!locationModal || !allowBtn || !skipBtn) {
         // 모달이 없으면 기존 방식으로 진행
@@ -227,6 +255,7 @@ function initLocationModal() {
     allowBtn.addEventListener('click', () => {
         locationModal.classList.remove('active');
         document.body.style.overflow = '';
+        localStorage.setItem('hf_location_permission', 'allowed');
         Analytics.track('location_permission', { action: 'allow' });
         requestGeolocation();
     });
@@ -235,6 +264,7 @@ function initLocationModal() {
     skipBtn.addEventListener('click', () => {
         locationModal.classList.remove('active');
         document.body.style.overflow = '';
+        // 건너뛰기는 저장하지 않음 (다음에 다시 물어봄)
         Analytics.track('location_permission', { action: 'skip' });
         useDefaultLocation();
     });

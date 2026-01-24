@@ -227,19 +227,45 @@ body {
     background: var(--success);
     color: var(--bg-primary);
     border: none;
-    border-radius: 14px;
-    padding: 6px 12px;
+    border-radius: 6px;
+    padding: 3px 10px;
     font-family: var(--font-primary);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-cta-small::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(
+        100deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: btn-shine 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes btn-shine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 150%;
+    }
 }
 
 .hero-cta-small:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(125, 211, 168, 0.3);
+    opacity: 0.9;
 }
 
 .hero-cta-small:active {
@@ -1256,4 +1282,31 @@ body {
     .map-container {
         height: 220px;
     }
+}
+
+/* ===== Section Title Highlight Effect ===== */
+.section-title {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.start-here-tag {
+    display: inline-block;
+    background: var(--success);
+    color: var(--bg-primary);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    opacity: 0;
+    animation: toast-appear 2.5s ease-in-out forwards;
+}
+
+@keyframes toast-appear {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
 }
