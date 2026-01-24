@@ -350,12 +350,14 @@ function updateMapWithUserLocation() {
     }
     
     // 기본 위치(성수역)일 때는 지하철 아이콘, 실제 위치일 때는 민트색 원
+    const isJpPage = document.documentElement.lang === 'ja';
+    const stationName = isJpPage ? '聖水駅' : '성수역';
     const markerIcon = state.isDefaultLocation 
         ? L.divIcon({
             className: 'custom-marker',
-            html: '<div class="marker-station">🚉</div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 14]
+            html: `<div class="marker-station-wrap"><div class="marker-station">🚉</div><span class="marker-station-label">${stationName}</span></div>`,
+            iconSize: [50, 40],
+            iconAnchor: [25, 14]
         })
         : L.divIcon({
             className: 'custom-marker',
