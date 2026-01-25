@@ -740,8 +740,29 @@ function initScrollTracking() {
         }
     });
     
-    // session_end 제거 - beforeunload는 신뢰도가 낮음 (브라우저가 종종 차단)
-    // GA4의 session_start와 engagement_time으로 대체 가능
+    // 세션 종료 시 요약 전송 (sendBeacon 사용으로 신뢰도 향상)
+    window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            const timeOnPage = Math.round((Date.now() - state.pageLoadTime) / 1000);
+            const events = Analytics.getEvents();
+            const scrollEvents = events.filter(e => e.event === 'scroll_depth');
+            const scrollDepths = scrollEvents.map(e => e.depth);
+            
+            Analytics.track('session_summary', {
+                timeOnPageSec: timeOnPage,
+                maxScrollDepth: scrollDepths.length > 0 ? Math.max(...scrollDepths) : 0,
+                scrolledAny: scrollDepths.length > 0,
+                scrolled25: scrollDepths.includes(25),
+                scrolled50: scrollDepths.includes(50),
+                scrolled75: scrollDepths.includes(75),
+                scrolled100: scrollDepths.includes(100),
+                totalEvents: events.length,
+                selectedSize: events.some(e => e.event === 'size_selected'),
+                clickedReserve: events.some(e => e.event === 'reserve_click'),
+                laterUseConversion: events.some(e => e.event === 'later_use_conversion')
+            });
+        }
+    });
 }
 
 // ===== Geolocation =====
@@ -1773,4 +1794,96 @@ window.debugLocation = () => {
 window.forceRecalculate = () => {
     console.log('[Hands Free] Force recalculating route...');
     fetchWalkingRoute();
+};
+
+// ===== 세션 요약 (복사해서 공유용) =====
+window.getSessionSummary = () => {
+    const events = Analytics.getEvents();
+    const now = Date.now();
+    const timeOnPage = Math.round((now - state.pageLoadTime) / 1000);
+    
+    // 스크롤 깊이 추출
+    const scrollEvents = events.filter(e => e.event === 'scroll_depth');
+    const scrollDepths = scrollEvents.map(e => e.depth);
+    const maxScroll = scrollDepths.length > 0 ? Math.max(...scrollDepths) : 0;
+    
+    // 주요 이벤트 체크
+    const hasEvents = (name) => events.some(e => e.event === name);
+    const getEventCount = (name) => events.filter(e => e.event === name).length;
+    
+    const summary = {
+        // 세션 정보
+        sessionId: state.sessionId,
+        timeOnPageSec: timeOnPage,
+        timeOnPageMin: Math.round(timeOnPage / 60 * 10) / 10,
+        
+        // 스크롤
+        scrollDepths: scrollDepths,
+        maxScrollDepth: maxScroll,
+        scrolled25: scrollDepths.includes(25),
+        scrolled50: scrollDepths.includes(50),
+        scrolled75: scrollDepths.includes(75),
+        scrolled100: scrollDepths.includes(100),
+        
+        // 퍼널
+        viewedLocationModal: hasEvents('location_modal_shown'),
+        allowedLocation: events.some(e => e.event === 'location_permission' && e.action === 'allow'),
+        selectedSize: hasEvents('size_selected'),
+        selectedTime: hasEvents('time_selected'),
+        clickedReserve: hasEvents('reserve_click'),
+        
+        // 채널 전환
+        openedChannelModal: hasEvents('channel_modal_open'),
+        selectedChannel: events.find(e => e.event === 'channel_selected')?.channel || null,
+        laterUseConversion: hasEvents('later_use_conversion'),
+        
+        // 인앱 브라우저
+        isInAppBrowser: hasEvents('inapp_browser_detected'),
+        inAppName: events.find(e => e.event === 'inapp_browser_detected')?.app || null,
+        
+        // 디바이스 정보
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        
+        // 전체 이벤트 목록
+        allEvents: events.map(e => e.event)
+    };
+    
+    console.log('=== 📊 세션 요약 ===');
+    console.log('체류 시간:', summary.timeOnPageMin, '분');
+    console.log('최대 스크롤:', summary.maxScrollDepth + '%');
+    console.log('스크롤 도달:', summary.scrollDepths.map(d => d + '%').join(' → ') || '없음');
+    console.log('');
+    console.log('=== 퍼널 ===');
+    console.log('위치 모달 표시:', summary.viewedLocationModal ? '✅' : '❌');
+    console.log('위치 허용:', summary.allowedLocation ? '✅' : '❌');
+    console.log('사이즈 선택:', summary.selectedSize ? '✅' : '❌');
+    console.log('예약 클릭:', summary.clickedReserve ? '✅' : '❌');
+    console.log('');
+    console.log('=== 채널 전환 ===');
+    console.log('채널 모달 오픈:', summary.openedChannelModal ? '✅' : '❌');
+    console.log('선택한 채널:', summary.selectedChannel || '없음');
+    console.log('나중에 이용 전환:', summary.laterUseConversion ? '✅' : '❌');
+    console.log('');
+    console.log('=== 복사용 JSON ===');
+    console.log(JSON.stringify(summary, null, 2));
+    
+    return summary;
+};
+
+// 복사하기 쉽게 클립보드에 복사
+window.copySessionData = async () => {
+    const summary = window.getSessionSummary();
+    const text = JSON.stringify(summary, null, 2);
+    
+    try {
+        await navigator.clipboard.writeText(text);
+        console.log('✅ 클립보드에 복사됨! 이 데이터를 공유해주세요.');
+    } catch (err) {
+        console.log('복사 실패. 위의 JSON을 직접 복사해주세요.');
+    }
+    
+    return summary;
 };
