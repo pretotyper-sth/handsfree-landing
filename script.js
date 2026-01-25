@@ -356,7 +356,7 @@ function scrollToDatetime() {
     const datetimeSection = document.querySelector('.datetime-section');
     if (datetimeSection) {
         const elementTop = datetimeSection.getBoundingClientRect().top + window.scrollY;
-        const offset = window.innerHeight / 5;
+        const offset = window.innerHeight / 3;
         window.scrollTo({
             top: elementTop - offset,
             behavior: 'smooth'
