@@ -45,57 +45,49 @@
 - [x] 가격 표시: 원가 취소선 + 할인가 표시 (3월까지 25% 할인)
 - [x] 일본어 페이지 동기화: 모든 UI 요소 번역 완료
 
-#### Analytics (GA4) - MECE 정리됨
+#### Analytics (GA4) - MECE 정리 (19개 이벤트)
 
-**페이지/세션**
+**1. 페이지/세션 (1개)**
+| 이벤트 | 설명 |
+|--------|------|
+| `page_view` | 페이지 조회 |
+
+**2. 스크롤 깊이 (4개)**
+| 이벤트 | 설명 |
+|--------|------|
+| `scroll_25` | 25% 도달 |
+| `scroll_50` | 50% 도달 |
+| `scroll_75` | 75% 도달 |
+| `scroll_100` | 끝까지 봄 |
+
+**3. 체류 시간 (5개)**
+| 이벤트 | 설명 |
+|--------|------|
+| `time_0_10s` | 10초 미만 (즉시 이탈) |
+| `time_10_30s` | 10~30초 |
+| `time_30_60s` | 30초~1분 |
+| `time_1_3m` | 1~3분 |
+| `time_3m_plus` | 3분 이상 |
+
+**4. 퍼널 진행 (5개)**
 | 이벤트 | 설명 | 속성 |
 |--------|------|------|
-| `page_view` | 페이지 조회 | referrer, screenWidth/Height, browserLanguage, pageLanguage, isReturning, visitCount |
-| `scroll_depth` | 스크롤 깊이 | depth (25/50/75/100) |
+| `hero_cta_click` | CTA 클릭 | type (reserve_now/later_use) |
+| `datetime_selected` | 이용 일시 선택 | type (date/time) |
+| `size_selected` | 사이즈 선택 | size, price |
+| `time_selected` | 사용 시간 선택 | hours, price |
+| `reserve_click` | 예약 클릭 | size, hours, price |
 
-**퍼널 진행**
+**5. 채널 전환 (1개)**
 | 이벤트 | 설명 | 속성 |
 |--------|------|------|
-| `hero_cta_click` | 상단 CTA 클릭 | type (reserve_now, later_use) |
-| `bottom_cta_click` | 하단 CTA 클릭 | type (later_use) |
-| `size_selected` | 사이즈 선택 | size, previousSize, price |
-| `time_selected` | 시간 선택 | hours, previousHours, price |
-| `datetime_selected` | 날짜/시간 선택 | type (date/time), value, isToday |
-| `reserve_click` | 예약 클릭 | attempt, size, hours, price, timeOnPage |
+| `later_use_conversion` | 채널 전환 | channel (instagram/kakao/line/share/copy_link) |
 
-**채널 전환**
+**6. 인앱 브라우저 (2개)**
 | 이벤트 | 설명 | 속성 |
 |--------|------|------|
-| `channel_modal_open` | 채널 모달 오픈 | language |
-| `channel_selected` | 개별 채널 선택 | channel (instagram, kakao, line, share, copy_link) |
-| `later_use_conversion` | **전환 (4개 중 아무거나 클릭)** | channel |
-| `share_completed` | 공유 완료 | method (web_share, copy_link) |
-| `channel_modal_close` | 채널 모달 닫기 | - |
-| `inapp_browser_detected` | 인앱 브라우저 감지 | app, platform, userAgent |
-| `open_in_browser_click` | Chrome으로 열기 클릭 | platform, app |
-| `inapp_banner_dismissed` | 배너 닫기 | - |
-
-**위치/지도**
-| 이벤트 | 설명 | 속성 |
-|--------|------|------|
-| `location_modal_shown` | 위치 모달 표시 | - |
-| `location_permission` | 위치 권한 응답 | action (allow, skip, backdrop_close) |
-| `geolocation_result` | 지오로케이션 결과 | success, lat, lng, accuracy / reason, code |
-| `route_calculated` | 경로 계산 | durationMin, distanceM, source (osrm/fallback), userLat, userLng |
-
-**기타 상호작용**
-| 이벤트 | 설명 | 속성 |
-|--------|------|------|
-| `language_selected` | 언어 변경 | from, to |
-| `copy_address` | 주소 복사 | - |
-
-**오류/이탈**
-| 이벤트 | 설명 | 속성 |
-|--------|------|------|
-| `error_modal_shown` | 오류 모달 표시 | - |
-| `modal_close` | 모달 닫기 | method (button, backdrop) |
-| `retry_click` | 재시도 클릭 | - |
-| `503_page_shown` | 503 페이지 표시 | - |
+| `inapp_browser_detected` | 인앱 감지 | app, platform |
+| `open_in_browser_click` | Chrome 열기 클릭 | platform, app |
 
 #### 가격 정책 (2026년 3월까지 25% 할인)
 
@@ -139,8 +131,8 @@
 - [ ] 실험 C: 리타겟팅 광고 전환율 비교 (첫 방문 vs 재방문)
 
 ### 퍼널 최적화
-- [ ] 인앱 브라우저 감지 → Safari/Chrome 열기 배너
-- [ ] First Fold 가치 제안 강화
+- [x] 인앱 브라우저 감지 → Chrome 열기 배너 ✅
+- [x] First Fold 가치 제안 강화 (PASONA(G) 적용) ✅
 - [ ] 위치 권한 없이도 예약 가능하게 (주소 직접 입력)
 - [ ] 신뢰도 강화: 실제 보관 시설 사진, 이용 후기
 
@@ -192,4 +184,4 @@
 
 ---
 
-*마지막 업데이트: 2025-01-25*
+*마지막 업데이트: 2026-01-25*
