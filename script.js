@@ -81,6 +81,146 @@ function generateSessionId() {
     return 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
 }
 
+// ===== In-App Browser Detection =====
+const InAppBrowser = {
+    // 인앱 브라우저 User-Agent 패턴
+    patterns: [
+        'FBAN', 'FBAV',           // Facebook
+        'Instagram',              // Instagram
+        'KAKAOTALK',              // KakaoTalk
+        'Line/',                  // LINE
+        'Twitter', 'TwitterAndroid', // Twitter/X
+        'NAVER',                  // Naver
+        'DaumApps',               // Daum/Kakao
+        'Snapchat',               // Snapchat
+        'BytedanceWebview',       // TikTok
+        'musical_ly',             // TikTok (old)
+        'SamsungBrowser/.*CrossApp', // Samsung Internet in-app
+        'FB_IAB', 'FB4A',         // Facebook variants
+        'FBIOS',                  // Facebook iOS
+    ],
+    
+    isInApp() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        return this.patterns.some(pattern => 
+            new RegExp(pattern, 'i').test(ua)
+        );
+    },
+    
+    getAppName() {
+        const ua = navigator.userAgent || '';
+        if (/FBAN|FBAV|FB_IAB|FB4A|FBIOS/i.test(ua)) return 'Facebook';
+        if (/Instagram/i.test(ua)) return 'Instagram';
+        if (/KAKAOTALK/i.test(ua)) return 'KakaoTalk';
+        if (/Line\//i.test(ua)) return 'LINE';
+        if (/Twitter/i.test(ua)) return 'Twitter';
+        if (/NAVER/i.test(ua)) return 'Naver';
+        if (/BytedanceWebview|musical_ly/i.test(ua)) return 'TikTok';
+        return 'In-App';
+    },
+    
+    isIOS() {
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    },
+    
+    isAndroid() {
+        return /Android/i.test(navigator.userAgent);
+    },
+    
+    // Chrome으로 열기
+    openInChrome() {
+        const currentUrl = window.location.href;
+        
+        if (this.isAndroid()) {
+            // Android: Intent 스킴 사용
+            const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+            window.location.href = intentUrl;
+        } else if (this.isIOS()) {
+            // iOS: googlechrome:// 또는 googlechromes:// 스킴 사용
+            const chromeUrl = currentUrl.replace(/^https:\/\//, 'googlechromes://').replace(/^http:\/\//, 'googlechrome://');
+            
+            // Chrome이 설치되어 있지 않을 경우를 대비해 타이머 설정
+            const timeout = setTimeout(() => {
+                // Chrome이 없으면 Safari로 열기 시도
+                this.openInSafari();
+            }, 2000);
+            
+            window.location.href = chromeUrl;
+            
+            // 페이지 이동 성공 시 타이머 취소
+            window.addEventListener('pagehide', () => clearTimeout(timeout));
+        }
+        
+        Analytics.track('open_in_browser_click', {
+            platform: this.isIOS() ? 'iOS' : (this.isAndroid() ? 'Android' : 'unknown'),
+            app: this.getAppName()
+        });
+    },
+    
+    // Safari로 열기 (iOS fallback)
+    openInSafari() {
+        const currentUrl = window.location.href;
+        // Safari 열기를 위한 다양한 방법 시도
+        // x-web-search 또는 단순 window.open
+        window.open(currentUrl, '_blank');
+    },
+    
+    // 배너 닫기 상태 저장
+    dismissBanner() {
+        sessionStorage.setItem('hf_inapp_banner_dismissed', 'true');
+        const banner = document.getElementById('inapp-browser-banner');
+        if (banner) {
+            banner.style.display = 'none';
+            document.body.classList.remove('inapp-banner-visible');
+        }
+    },
+    
+    // 배너 표시 여부 확인
+    shouldShowBanner() {
+        // 이미 닫았으면 표시 안 함
+        if (sessionStorage.getItem('hf_inapp_banner_dismissed') === 'true') {
+            return false;
+        }
+        return this.isInApp();
+    },
+    
+    // 배너 초기화
+    init() {
+        if (!this.shouldShowBanner()) return;
+        
+        const banner = document.getElementById('inapp-browser-banner');
+        const openBtn = document.getElementById('open-in-browser-btn');
+        const closeBtn = document.getElementById('inapp-banner-close');
+        
+        if (!banner) return;
+        
+        // 배너 표시
+        banner.classList.add('show');
+        document.body.classList.add('inapp-banner-visible');
+        
+        Analytics.track('inapp_browser_detected', {
+            app: this.getAppName(),
+            platform: this.isIOS() ? 'iOS' : (this.isAndroid() ? 'Android' : 'unknown'),
+            userAgent: navigator.userAgent
+        });
+        
+        // Chrome으로 열기 버튼
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                this.openInChrome();
+            });
+        }
+        
+        // 닫기 버튼
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.dismissBanner();
+                Analytics.track('inapp_banner_dismissed');
+            });
+        }
+    }
+};
+
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
     // 재방문자 체크
@@ -96,6 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isReturning: isReturning,
         visitCount: getVisitCount()
     });
+    
+    // 인앱 브라우저 감지 및 배너 표시
+    InAppBrowser.init();
     
     initMap();
     initLocationModal(); // 위치 권한 모달 초기화 (즉시 요청 대신)

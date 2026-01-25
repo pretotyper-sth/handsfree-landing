@@ -39,6 +39,26 @@
     </script>
 </head>
 <body>
+    <!-- In-App Browser Banner -->
+    <div class="inapp-browser-banner" id="inapp-browser-banner" style="display: none;">
+        <div class="inapp-banner-content">
+            <div class="inapp-banner-icon">⚠️</div>
+            <div class="inapp-banner-text">
+                <p class="inapp-banner-title">외부 브라우저에서 열어주세요</p>
+                <p class="inapp-banner-desc">위치 기능이 제한됩니다</p>
+            </div>
+            <button class="inapp-banner-btn" id="open-in-browser-btn">
+                <span>Chrome으로 열기</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </button>
+        </div>
+        <button class="inapp-banner-close" id="inapp-banner-close">✕</button>
+    </div>
+
     <div class="app-container" id="app-container">
         <!-- Header -->
         <header class="header">
