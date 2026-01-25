@@ -224,7 +224,6 @@ const InAppBrowser = {
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 this.dismissBanner();
-                Analytics.track('inapp_banner_dismissed');
             });
         }
     }
@@ -319,20 +318,6 @@ function initLanguageDropdown() {
         }
     });
     
-    // 언어 선택 링크 클릭 트래킹
-    const languageLinks = dropdown.querySelectorAll('.language-option');
-    languageLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            const targetLang = link.href.includes('/jp') ? 'ja' : 'ko';
-            const currentLang = window.location.pathname.includes('/jp') ? 'ja' : 'ko';
-            if (targetLang !== currentLang) {
-                Analytics.track('language_selected', { 
-                    from: currentLang, 
-                    to: targetLang 
-                });
-            }
-        });
-    });
 }
 
 // ===== Hero CTA (First Fold) =====
@@ -360,7 +345,7 @@ function initHeroCTA() {
     // 나중에 이용하기 버튼 (하단)
     if (bottomSaveBtn) {
         bottomSaveBtn.addEventListener('click', () => {
-            Analytics.track('bottom_cta_click', { type: 'later_use' });
+            Analytics.track('hero_cta_click', { type: 'later_use' });
             showSaveModal();
         });
     }
@@ -396,9 +381,6 @@ function scrollToDatetime() {
 function showSaveModal() {
     const isJapanese = window.location.pathname.includes('/jp');
     const canShare = navigator.share !== undefined;
-    
-    // 채널 선택 모달 오픈 트래킹
-    Analytics.track('channel_modal_open', { language: isJapanese ? 'ja' : 'ko' });
     
     // 채널 선택 모달 HTML (로고 이미지 사용)
     const modalHTML = `
@@ -454,7 +436,6 @@ function showSaveModal() {
     
     // 닫기
     const closeModal = () => {
-        Analytics.track('channel_modal_close');
         overlay.remove();
     };
     
@@ -463,10 +444,9 @@ function showSaveModal() {
         if (e.target === overlay) closeModal();
     });
     
-    // 전환 트래킹 (3가지 중 하나라도 클릭하면 전환)
+    // 전환 트래킹
     const trackConversion = (channel) => {
-        Analytics.track('channel_selected', { channel }); // 개별 로깅
-        Analytics.track('later_use_conversion', { channel }); // 통합 전환 로깅
+        Analytics.track('later_use_conversion', { channel });
     };
     
     // 인스타그램 선택 - 바로 페이지 전환
@@ -502,7 +482,6 @@ function showSaveModal() {
                     text: isJapanese ? '聖水で手ぶら観光！荷物を預けて自由に楽しもう' : '성수에서 짐 맡기고 자유롭게 즐기세요!',
                     url: window.location.href
                 });
-                Analytics.track('share_completed', { method: 'web_share' });
                 overlay.remove();
             } catch (err) {
                 // 사용자가 취소하거나 에러 발생
@@ -613,7 +592,6 @@ function initLocationModal() {
         modalShown = true;
         locationModal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        Analytics.track('location_modal_shown');
     };
     
     // 지도가 화면 중앙에 위치했을 때 모달 표시 (Intersection Observer)
@@ -639,7 +617,6 @@ function initLocationModal() {
         locationModal.classList.remove('active');
         document.body.style.overflow = '';
         localStorage.setItem('hf_location_permission', 'allowed');
-        Analytics.track('location_permission', { action: 'allow' });
         requestGeolocation();
     });
     
@@ -647,8 +624,6 @@ function initLocationModal() {
     skipBtn.addEventListener('click', () => {
         locationModal.classList.remove('active');
         document.body.style.overflow = '';
-        // 건너뛰기는 저장하지 않음 (다음에 다시 물어봄)
-        Analytics.track('location_permission', { action: 'skip' });
         useDefaultLocation();
     });
     
@@ -657,7 +632,6 @@ function initLocationModal() {
         if (e.target === locationModal) {
             locationModal.classList.remove('active');
             document.body.style.overflow = '';
-            Analytics.track('location_permission', { action: 'backdrop_close' });
             useDefaultLocation();
         }
     });
@@ -673,7 +647,6 @@ function initGeolocationDelayed() {
 function requestGeolocation() {
     if (!navigator.geolocation) {
         console.log('[Hands Free] Geolocation not supported');
-        Analytics.track('geolocation_result', { success: false, reason: 'not_supported' });
         useDefaultLocation();
         return;
     }
@@ -691,23 +664,11 @@ function requestGeolocation() {
             console.log('[Hands Free] Location received:', state.userLocation);
             console.log('[Hands Free] Accuracy:', position.coords.accuracy, 'm');
             
-            Analytics.track('geolocation_result', {
-                success: true,
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                accuracy: position.coords.accuracy
-            });
-            
             updateMapWithUserLocation();
             fetchWalkingRoute();
         },
         (error) => {
             console.log('[Hands Free] Geolocation error:', error.message);
-            Analytics.track('geolocation_result', { 
-                success: false,
-                reason: error.message,
-                code: error.code 
-            });
             useDefaultLocation();
         },
         { 
@@ -741,11 +702,10 @@ function initScrollTracking() {
         }
     });
     
-    // 세션 종료 시 요약 전송
+    // 세션 종료 시 체류시간 전송
     window.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
             const timeOnPage = Math.round((Date.now() - state.pageLoadTime) / 1000);
-            const events = Analytics.getEvents();
             
             // 체류시간 구간별로 이벤트 이름 다르게
             let timeCategory;
@@ -756,10 +716,6 @@ function initScrollTracking() {
             else timeCategory = 'time_3m_plus';
             
             Analytics.track(timeCategory, { timeOnPageSec: timeOnPage });
-            
-            // 최대 스크롤 도달 지점
-            const maxScrollReached = Math.max(...[0, ...scrollMilestones.filter(m => trackedMilestones.has(m))]);
-            Analytics.track(`max_scroll_${maxScrollReached}`, { maxScroll: maxScrollReached });
         }
     });
 }
@@ -864,14 +820,6 @@ async function fetchWalkingRoute() {
             // 기본 위치(성수역)일 때는 6분 고정, 실제 위치일 때는 계산값 사용
             const displayMin = state.isDefaultLocation ? 6 : durationMin;
             document.getElementById('walk-time').querySelector('span').textContent = `도보 ${displayMin}분`;
-            
-            Analytics.track('route_calculated', {
-                durationMin,
-                distanceM,
-                source: 'osrm',
-                userLat: start.lat,
-                userLng: start.lng
-            });
         } else {
             throw new Error('No routes in response');
         }
@@ -929,14 +877,6 @@ function updateDistanceFallback() {
     // 기본 위치(성수역)일 때는 6분 고정
     const displayMin = state.isDefaultLocation ? 6 : walkingMinutes;
     document.getElementById('walk-time').querySelector('span').textContent = state.isDefaultLocation ? `도보 ${displayMin}분` : `도보 약 ${displayMin}분`;
-    
-    Analytics.track('route_calculated', {
-        durationMin: walkingMinutes,
-        distanceM: walkingDistance,
-        source: 'fallback',
-        userLat: state.userLocation.lat,
-        userLng: state.userLocation.lng
-    });
     
     drawFallbackRoute();
 }
@@ -1043,7 +983,6 @@ function initCopyAddress() {
         try {
             await navigator.clipboard.writeText(CONFIG.destination.fullAddress);
             showToast();
-            Analytics.track('copy_address');
         } catch (err) {
             const textArea = document.createElement('textarea');
             textArea.value = CONFIG.destination.fullAddress;
@@ -1052,7 +991,6 @@ function initCopyAddress() {
             document.execCommand('copy');
             document.body.removeChild(textArea);
             showToast();
-            Analytics.track('copy_address');
         }
     });
 }
@@ -1709,20 +1647,17 @@ function initErrorModal() {
     const closeBtn = document.getElementById('close-error-modal');
     
     retryBtn.addEventListener('click', () => {
-        Analytics.track('retry_click');
         hideErrorModal();
         state.reserveClickCount++;
         show503Page();
     });
     
     closeBtn.addEventListener('click', () => {
-        Analytics.track('modal_close', { method: 'button' });
         hideErrorModal();
     });
     
     errorModal.addEventListener('click', (e) => {
         if (e.target === errorModal) {
-            Analytics.track('modal_close', { method: 'backdrop' });
             hideErrorModal();
         }
     });
@@ -1731,7 +1666,6 @@ function initErrorModal() {
 function showErrorModal() {
     document.getElementById('error-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    Analytics.track('error_modal_shown');
 }
 
 function hideErrorModal() {
@@ -1743,7 +1677,6 @@ function show503Page() {
     document.getElementById('app-container').style.display = 'none';
     document.getElementById('error-page').style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    Analytics.track('503_page_shown');
 }
 
 // ===== Scroll Effects =====
