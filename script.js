@@ -734,33 +734,32 @@ function initScrollTracking() {
             scrollMilestones.forEach(milestone => {
                 if (scrollPercent >= milestone && !trackedMilestones.has(milestone)) {
                     trackedMilestones.add(milestone);
-                    Analytics.track('scroll_depth', { depth: milestone });
+                    // 이벤트 이름에 퍼센트 포함 (Looker Studio에서 바로 보이게)
+                    Analytics.track(`scroll_${milestone}`, { depth: milestone });
                 }
             });
         }
     });
     
-    // 세션 종료 시 요약 전송 (sendBeacon 사용으로 신뢰도 향상)
+    // 세션 종료 시 요약 전송
     window.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
             const timeOnPage = Math.round((Date.now() - state.pageLoadTime) / 1000);
             const events = Analytics.getEvents();
-            const scrollEvents = events.filter(e => e.event === 'scroll_depth');
-            const scrollDepths = scrollEvents.map(e => e.depth);
             
-            Analytics.track('session_summary', {
-                timeOnPageSec: timeOnPage,
-                maxScrollDepth: scrollDepths.length > 0 ? Math.max(...scrollDepths) : 0,
-                scrolledAny: scrollDepths.length > 0,
-                scrolled25: scrollDepths.includes(25),
-                scrolled50: scrollDepths.includes(50),
-                scrolled75: scrollDepths.includes(75),
-                scrolled100: scrollDepths.includes(100),
-                totalEvents: events.length,
-                selectedSize: events.some(e => e.event === 'size_selected'),
-                clickedReserve: events.some(e => e.event === 'reserve_click'),
-                laterUseConversion: events.some(e => e.event === 'later_use_conversion')
-            });
+            // 체류시간 구간별로 이벤트 이름 다르게
+            let timeCategory;
+            if (timeOnPage < 10) timeCategory = 'time_0_10s';
+            else if (timeOnPage < 30) timeCategory = 'time_10_30s';
+            else if (timeOnPage < 60) timeCategory = 'time_30_60s';
+            else if (timeOnPage < 180) timeCategory = 'time_1_3m';
+            else timeCategory = 'time_3m_plus';
+            
+            Analytics.track(timeCategory, { timeOnPageSec: timeOnPage });
+            
+            // 최대 스크롤 도달 지점
+            const maxScrollReached = Math.max(...[0, ...scrollMilestones.filter(m => trackedMilestones.has(m))]);
+            Analytics.track(`max_scroll_${maxScrollReached}`, { maxScroll: maxScrollReached });
         }
     });
 }
