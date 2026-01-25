@@ -19,6 +19,10 @@
     <meta name="twitter:image" content="https://handsfree-landing.vercel.app/og-image.jpg">
     <link rel="icon" type="image/png" href="../favicon.png">
     <link rel="apple-touch-icon" href="../favicon.png">
+    <!-- Preload channel logos -->
+    <link rel="preload" as="image" href="/instagram-logo.png">
+    <link rel="preload" as="image" href="/kakao-logo.png">
+    <link rel="preload" as="image" href="/line-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
@@ -359,8 +363,8 @@
     <div class="modal-overlay" id="error-modal">
         <div class="modal-content">
             <div class="modal-icon error">!</div>
-            <h3 class="modal-title">一時的なエラー</h3>
-            <p class="modal-desc">申し訳ございません。一時的なエラーが発生しました。<br>しばらくしてから再度お試しください。</p>
+            <h3 class="modal-title">接続エラー</h3>
+            <p class="modal-desc">しばらくしてから再度お試しください</p>
             <button class="modal-btn primary" id="retry-btn">再試行</button>
             <button class="modal-btn secondary" id="close-error-modal">閉じる</button>
         </div>

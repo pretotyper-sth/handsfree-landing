@@ -32,7 +32,8 @@
   - 서브: "역에서 도보 6분 · 24시간 · 오늘 21명 이용 중"
   - CTA 버튼 2개: "살펴보기" + "채널 추가" (나중에 이용하기)
   - 할인 텍스트: "🎫 오픈 기념, 3월까지 25% 할인" (shine 효과)
-- [x] 채널 선택 모달: 인스타그램 / 카카오톡 / 공유하기 / 링크 복사
+- [x] 채널 선택 모달: 인스타그램 / 카카오톡 / LINE(일본어) / 공유하기 / 링크 복사
+- [x] 채널 로고 최적화: 이미지 리사이즈 및 preload (179KB → 14KB)
 - [x] 인앱 브라우저 감지 배너: Instagram/Facebook 등 인앱에서 Chrome으로 열기 유도
 - [x] 살펴보기 버튼 클릭 → 일시 선택 섹션으로 스크롤 + "여기부터 시작" 토스트 태그
 - [x] 지도 섹션: "위치" 타이틀 추가
@@ -66,7 +67,7 @@
 | 이벤트 | 설명 | 속성 |
 |--------|------|------|
 | `channel_modal_open` | 채널 모달 오픈 | language |
-| `channel_selected` | 개별 채널 선택 | channel (instagram, kakao, share, copy_link) |
+| `channel_selected` | 개별 채널 선택 | channel (instagram, kakao, line, share, copy_link) |
 | `later_use_conversion` | **전환 (4개 중 아무거나 클릭)** | channel |
 | `share_completed` | 공유 완료 | method (web_share, copy_link) |
 | `channel_modal_close` | 채널 모달 닫기 | - |

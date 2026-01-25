@@ -405,16 +405,22 @@ function showSaveModal() {
         <div class="save-modal-overlay" id="save-modal-overlay">
             <div class="save-modal">
                 <button class="save-modal-close" id="save-modal-close">✕</button>
-                <h3 class="save-modal-title">${isJapanese ? 'フォロー・チャンネル追加' : '팔로우 · 채널 추가'}</h3>
-                <p class="save-modal-desc">${isJapanese ? '必要な時にすぐ利用できます' : '필요할 때 바로 이용할 수 있어요'}</p>
+                <h3 class="save-modal-title">${isJapanese ? '後で利用する' : '나중에 이용하기'}</h3>
+                <p class="save-modal-desc">${isJapanese ? '保存して必要な時にすぐ見つけよう' : '저장하고 필요할 때 쉽게 찾을 수 있어요'}</p>
                 <div class="channel-options">
                     <button class="channel-option" id="channel-instagram">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png" class="channel-logo" alt="Instagram">
+                        <img src="/instagram-logo.png" class="channel-logo" alt="Instagram">
                         <span class="channel-name">${isJapanese ? 'Instagram フォロー' : '인스타그램 팔로우'}</span>
                     </button>
+                    ${isJapanese ? `
+                    <button class="channel-option" id="channel-line">
+                        <img src="/line-logo.png" class="channel-logo" alt="LINE">
+                        <span class="channel-name">LINE 友だち追加</span>
+                    </button>
+                    ` : ''}
                     <button class="channel-option" id="channel-kakao">
                         <img src="/kakao-logo.png" class="channel-logo" alt="KakaoTalk">
-                        <span class="channel-name">${isJapanese ? 'カカオトーク チャンネル' : '카카오톡 채널 추가'}</span>
+                        <span class="channel-name">${isJapanese ? 'KakaoTalk チャンネル追加' : '카카오톡 채널 추가'}</span>
                     </button>
                 </div>
                 <div class="channel-divider">
@@ -441,6 +447,7 @@ function showSaveModal() {
     const overlay = document.getElementById('save-modal-overlay');
     const closeBtn = document.getElementById('save-modal-close');
     const kakaoBtn = document.getElementById('channel-kakao');
+    const lineBtn = document.getElementById('channel-line');
     const instaBtn = document.getElementById('channel-instagram');
     const shareBtn = document.getElementById('channel-share');
     const copyBtn = document.getElementById('channel-copy');
@@ -473,8 +480,17 @@ function showSaveModal() {
     kakaoBtn.addEventListener('click', () => {
         trackConversion('kakao');
         overlay.remove();
-        showKakaoComingSoon(isJapanese);
+        showComingSoonModal(isJapanese, 'kakao');
     });
+    
+    // LINE 선택 - 준비 중 표시 (일본어)
+    if (lineBtn) {
+        lineBtn.addEventListener('click', () => {
+            trackConversion('line');
+            overlay.remove();
+            showComingSoonModal(isJapanese, 'line');
+        });
+    }
     
     // 공유하기 (Web Share API)
     if (shareBtn) {
@@ -521,13 +537,39 @@ function showSaveModal() {
     }
 }
 
-// 카카오톡 준비 중 표시
-function showKakaoComingSoon(isJapanese) {
+// 채널 준비 중 표시 (카카오톡/LINE)
+function showComingSoonModal(isJapanese, channel) {
+    const messages = {
+        kakao: {
+            ko: {
+                title: '준비 중이에요',
+                desc: '카카오톡 채널을 준비하고 있어요.<br>인스타그램을 팔로우해주세요!'
+            },
+            ja: {
+                title: '準備中です',
+                desc: 'KakaoTalkチャンネルは現在準備中です。<br>Instagramをフォローしてください！'
+            }
+        },
+        line: {
+            ko: {
+                title: '준비 중이에요',
+                desc: 'LINE 공식 계정을 준비하고 있어요.<br>인스타그램을 팔로우해주세요!'
+            },
+            ja: {
+                title: '準備中です',
+                desc: 'LINE公式アカウントは現在準備中です。<br>Instagramをフォローしてください！'
+            }
+        }
+    };
+    
+    const lang = isJapanese ? 'ja' : 'ko';
+    const msg = messages[channel]?.[lang] || messages.kakao[lang];
+    
     const errorHTML = `
         <div class="save-modal-overlay" id="error-modal-overlay">
             <div class="save-modal">
-                <h3 class="save-modal-title">${isJapanese ? '準備中です' : '준비 중이에요'}</h3>
-                <p class="save-modal-desc">${isJapanese ? 'カカオトークチャンネルは現在準備中です。<br>Instagramをフォローしてください！' : '카카오톡 채널을 준비하고 있어요.<br>인스타그램을 팔로우해주세요!'}</p>
+                <h3 class="save-modal-title">${msg.title}</h3>
+                <p class="save-modal-desc">${msg.desc}</p>
                 <button class="save-modal-btn" id="error-close-btn">${isJapanese ? '確認' : '확인'}</button>
             </div>
         </div>
