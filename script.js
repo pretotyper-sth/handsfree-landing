@@ -395,6 +395,7 @@ function scrollToDatetime() {
 // 나중에 이용하기 버튼 클릭 - 채널 선택 모달
 function showSaveModal() {
     const isJapanese = window.location.pathname.includes('/jp');
+    const canShare = navigator.share !== undefined;
     
     // 채널 선택 모달 오픈 트래킹
     Analytics.track('channel_modal_open', { language: isJapanese ? 'ja' : 'ko' });
@@ -416,6 +417,21 @@ function showSaveModal() {
                         <span class="channel-name">${isJapanese ? 'カカオトーク チャンネル' : '카카오톡 채널 추가'}</span>
                     </button>
                 </div>
+                <div class="channel-divider">
+                    <span>${isJapanese ? 'または' : '또는'}</span>
+                </div>
+                <div class="channel-options channel-options-secondary">
+                    ${canShare ? `
+                    <button class="channel-option channel-option-secondary" id="channel-share">
+                        <span class="channel-icon">📤</span>
+                        <span class="channel-name">${isJapanese ? '共有する' : '공유하기'}</span>
+                    </button>
+                    ` : ''}
+                    <button class="channel-option channel-option-secondary" id="channel-copy">
+                        <span class="channel-icon">🔗</span>
+                        <span class="channel-name">${isJapanese ? 'リンクをコピー' : '링크 복사'}</span>
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -426,6 +442,8 @@ function showSaveModal() {
     const closeBtn = document.getElementById('save-modal-close');
     const kakaoBtn = document.getElementById('channel-kakao');
     const instaBtn = document.getElementById('channel-instagram');
+    const shareBtn = document.getElementById('channel-share');
+    const copyBtn = document.getElementById('channel-copy');
     
     // 닫기
     const closeModal = () => {
@@ -438,19 +456,69 @@ function showSaveModal() {
         if (e.target === overlay) closeModal();
     });
     
+    // 전환 트래킹 (3가지 중 하나라도 클릭하면 전환)
+    const trackConversion = (channel) => {
+        Analytics.track('channel_selected', { channel }); // 개별 로깅
+        Analytics.track('later_use_conversion', { channel }); // 통합 전환 로깅
+    };
+    
     // 인스타그램 선택 - 바로 페이지 전환
     instaBtn.addEventListener('click', () => {
-        Analytics.track('channel_selected', { channel: 'instagram' });
+        trackConversion('instagram');
         window.open('https://www.instagram.com/handsfree.seongsu/', '_blank');
         overlay.remove();
     });
     
     // 카카오톡 선택 - 준비 중 표시
     kakaoBtn.addEventListener('click', () => {
-        Analytics.track('channel_selected', { channel: 'kakao' });
+        trackConversion('kakao');
         overlay.remove();
         showKakaoComingSoon(isJapanese);
     });
+    
+    // 공유하기 (Web Share API)
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            trackConversion('share');
+            try {
+                await navigator.share({
+                    title: isJapanese ? 'HandsFree - 聖水24時間荷物預かり' : 'HandsFree - 성수 24시 물품 보관',
+                    text: isJapanese ? '聖水で手ぶら観光！荷物を預けて自由に楽しもう' : '성수에서 짐 맡기고 자유롭게 즐기세요!',
+                    url: window.location.href
+                });
+                Analytics.track('share_completed', { method: 'web_share' });
+                overlay.remove();
+            } catch (err) {
+                // 사용자가 취소하거나 에러 발생
+                if (err.name !== 'AbortError') {
+                    console.log('Share failed:', err);
+                }
+            }
+        });
+    }
+    
+    // 링크 복사
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+            trackConversion('copy_link');
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                // 복사 완료 피드백 (모달 닫지 않음)
+                copyBtn.querySelector('.channel-name').textContent = isJapanese ? 'コピーしました！' : '복사 완료!';
+                copyBtn.classList.add('copied');
+            } catch (err) {
+                // 폴백: execCommand 사용
+                const textArea = document.createElement('textarea');
+                textArea.value = window.location.href;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                copyBtn.querySelector('.channel-name').textContent = isJapanese ? 'コピーしました！' : '복사 완료!';
+                copyBtn.classList.add('copied');
+            }
+        });
+    }
 }
 
 // 카카오톡 준비 중 표시
