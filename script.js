@@ -15,7 +15,15 @@ const CONFIG = {
     arrivalBuffer: 30
 };
 
+// 오픈 기념 25% 할인 적용 가격
 const PRICE_TABLE = {
+    'S': { 4: 3000, 8: 5250 },
+    'M': { 4: 3000, 8: 5250 },
+    'L': { 4: 3750, 8: 6000 }
+};
+
+// 원가 테이블
+const ORIGINAL_PRICE_TABLE = {
     'S': { 4: 4000, 8: 7000 },
     'M': { 4: 4000, 8: 7000 },
     'L': { 4: 5000, 8: 8000 }
@@ -25,9 +33,10 @@ const PRICE_TABLE = {
 let state = {
     selectedSize: 'M',
     selectedHours: 4,
-    selectedPrice: 4000,
+    selectedPrice: 3000,
     selectedDate: null,  // 선택된 날짜
     selectedTime: null,  // 선택된 시간
+    isDiscountApplied: true,  // 할인 적용 여부 (2월까지)
     userLocation: null,
     isDefaultLocation: false,  // 기본 위치(성수역) 사용 여부
     map: null,
@@ -227,12 +236,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const isReturning = checkReturningUser();
     
     // 페이지 로드 트래킹 (재방문 여부 포함)
+    const isJapanese = window.location.pathname.includes('/jp');
     Analytics.track('page_view', {
         referrer: document.referrer,
         userAgent: navigator.userAgent,
         screenWidth: window.innerWidth,
         screenHeight: window.innerHeight,
-        language: navigator.language,
+        browserLanguage: navigator.language,
+        pageLanguage: isJapanese ? 'ja' : 'ko',
         isReturning: isReturning,
         visitCount: getVisitCount()
     });
@@ -307,43 +318,161 @@ function initLanguageDropdown() {
             dropdown.classList.remove('active');
         }
     });
+    
+    // 언어 선택 링크 클릭 트래킹
+    const languageLinks = dropdown.querySelectorAll('.language-option');
+    languageLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const targetLang = link.href.includes('/jp') ? 'ja' : 'ko';
+            const currentLang = window.location.pathname.includes('/jp') ? 'ja' : 'ko';
+            if (targetLang !== currentLang) {
+                Analytics.track('language_selected', { 
+                    from: currentLang, 
+                    to: targetLang 
+                });
+            }
+        });
+    });
 }
 
 // ===== Hero CTA (First Fold) =====
 function initHeroCTA() {
     const heroBtn = document.getElementById('hero-reserve-btn');
-    if (!heroBtn) return;
+    const saveBtn = document.getElementById('hero-save-btn');
+    const bottomSaveBtn = document.getElementById('bottom-save-btn');
     
-    heroBtn.addEventListener('click', () => {
-        Analytics.track('hero_cta_click');
+    // 지금 예약하기 버튼
+    if (heroBtn) {
+        heroBtn.addEventListener('click', () => {
+            Analytics.track('hero_cta_click', { type: 'reserve_now' });
+            scrollToDatetime();
+        });
+    }
+    
+    // 나중에 이용하기 버튼 (상단)
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            Analytics.track('hero_cta_click', { type: 'later_use' });
+            showSaveModal();
+        });
+    }
+    
+    // 나중에 이용하기 버튼 (하단)
+    if (bottomSaveBtn) {
+        bottomSaveBtn.addEventListener('click', () => {
+            Analytics.track('bottom_cta_click', { type: 'later_use' });
+            showSaveModal();
+        });
+    }
+}
+
+// 일시 선택 섹션으로 스크롤
+function scrollToDatetime() {
+    const datetimeSection = document.querySelector('.datetime-section');
+    if (datetimeSection) {
+        const elementTop = datetimeSection.getBoundingClientRect().top + window.scrollY;
+        const offset = window.innerHeight / 5;
+        window.scrollTo({
+            top: elementTop - offset,
+            behavior: 'smooth'
+        });
         
-        // 이용 시작 일시 섹션으로 부드럽게 스크롤 (상단 1/5 위치)
-        const datetimeSection = document.querySelector('.datetime-section');
-        if (datetimeSection) {
-            const elementTop = datetimeSection.getBoundingClientRect().top + window.scrollY;
-            const offset = window.innerHeight / 5; // 화면 상단 1/5 지점
-            window.scrollTo({
-                top: elementTop - offset,
-                behavior: 'smooth'
-            });
-            
-            // 이용 시작 일시 타이틀 옆에 '여기부터 시작' 태그 표시
-            const sectionTitle = datetimeSection.querySelector('.section-title');
-            if (sectionTitle && !sectionTitle.querySelector('.start-here-tag')) {
-                setTimeout(() => {
-                    const tag = document.createElement('span');
-                    tag.className = 'start-here-tag';
-                    const isJapanese = window.location.pathname.includes('/jp');
-                    tag.textContent = isJapanese ? 'ここからスタート' : '여기부터 시작';
-                    sectionTitle.appendChild(tag);
-                    
-                    // 애니메이션 완료 후 태그 제거
-                    setTimeout(() => {
-                        tag.remove();
-                    }, 2600);
-                }, 500); // 스크롤 완료 후 태그 표시
-            }
+        // 여기부터 시작 태그 표시
+        const sectionTitle = datetimeSection.querySelector('.section-title');
+        if (sectionTitle && !sectionTitle.querySelector('.start-here-tag')) {
+            setTimeout(() => {
+                const tag = document.createElement('span');
+                tag.className = 'start-here-tag';
+                const isJapanese = window.location.pathname.includes('/jp');
+                tag.textContent = isJapanese ? 'ここからスタート' : '여기부터 시작';
+                sectionTitle.appendChild(tag);
+                setTimeout(() => tag.remove(), 2600);
+            }, 500);
         }
+    }
+}
+
+// 나중에 이용하기 버튼 클릭 - 채널 선택 모달
+function showSaveModal() {
+    const isJapanese = window.location.pathname.includes('/jp');
+    
+    // 채널 선택 모달 오픈 트래킹
+    Analytics.track('channel_modal_open', { language: isJapanese ? 'ja' : 'ko' });
+    
+    // 채널 선택 모달 HTML (로고 이미지 사용)
+    const modalHTML = `
+        <div class="save-modal-overlay" id="save-modal-overlay">
+            <div class="save-modal">
+                <button class="save-modal-close" id="save-modal-close">✕</button>
+                <h3 class="save-modal-title">${isJapanese ? 'フォロー・チャンネル追加' : '팔로우 · 채널 추가'}</h3>
+                <p class="save-modal-desc">${isJapanese ? '必要な時にすぐ利用できます' : '필요할 때 바로 이용할 수 있어요'}</p>
+                <div class="channel-options">
+                    <button class="channel-option" id="channel-instagram">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png" class="channel-logo" alt="Instagram">
+                        <span class="channel-name">${isJapanese ? 'Instagram フォロー' : '인스타그램 팔로우'}</span>
+                    </button>
+                    <button class="channel-option" id="channel-kakao">
+                        <img src="/kakao-logo.png" class="channel-logo" alt="KakaoTalk">
+                        <span class="channel-name">${isJapanese ? 'カカオトーク チャンネル' : '카카오톡 채널 추가'}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    const overlay = document.getElementById('save-modal-overlay');
+    const closeBtn = document.getElementById('save-modal-close');
+    const kakaoBtn = document.getElementById('channel-kakao');
+    const instaBtn = document.getElementById('channel-instagram');
+    
+    // 닫기
+    const closeModal = () => {
+        Analytics.track('channel_modal_close');
+        overlay.remove();
+    };
+    
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+    });
+    
+    // 인스타그램 선택 - 바로 페이지 전환
+    instaBtn.addEventListener('click', () => {
+        Analytics.track('channel_selected', { channel: 'instagram' });
+        window.open('https://www.instagram.com/handsfree.seongsu/', '_blank');
+        overlay.remove();
+    });
+    
+    // 카카오톡 선택 - 준비 중 표시
+    kakaoBtn.addEventListener('click', () => {
+        Analytics.track('channel_selected', { channel: 'kakao' });
+        overlay.remove();
+        showKakaoComingSoon(isJapanese);
+    });
+}
+
+// 카카오톡 준비 중 표시
+function showKakaoComingSoon(isJapanese) {
+    const errorHTML = `
+        <div class="save-modal-overlay" id="error-modal-overlay">
+            <div class="save-modal">
+                <h3 class="save-modal-title">${isJapanese ? '準備中です' : '준비 중이에요'}</h3>
+                <p class="save-modal-desc">${isJapanese ? 'カカオトークチャンネルは現在準備中です。<br>Instagramをフォローしてください！' : '카카오톡 채널을 준비하고 있어요.<br>인스타그램을 팔로우해주세요!'}</p>
+                <button class="save-modal-btn" id="error-close-btn">${isJapanese ? '確認' : '확인'}</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', errorHTML);
+    
+    const overlay = document.getElementById('error-modal-overlay');
+    document.getElementById('error-close-btn').addEventListener('click', () => {
+        overlay.remove();
+    });
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
     });
 }
 
@@ -693,7 +822,6 @@ function drawFallbackRoute() {
     if (state.routeLayer) state.map.removeLayer(state.routeLayer);
     if (state.routeGlow) state.map.removeLayer(state.routeGlow);
     
-    // 실선 경로 (위치 허용했을 때와 동일한 스타일)
     state.routeGlow = L.polyline(latLngs, {
         color: '#ffffff',
         weight: 8,
@@ -952,20 +1080,62 @@ function updateTimeCardAvailability() {
     });
 }
 
+// ===== 할인 적용 여부 확인 (2월까지) =====
+function checkDiscountApplicable() {
+    if (!state.selectedDate) {
+        state.isDiscountApplied = true;
+        return;
+    }
+    
+    const selectedDate = new Date(state.selectedDate);
+    // 2026년 3월 31일까지 할인 적용
+    const discountEndDate = new Date(2026, 2, 31, 23, 59, 59); // 3월은 2 (0-indexed)
+    state.isDiscountApplied = selectedDate <= discountEndDate;
+}
+
 // ===== Price Calculation =====
 function updatePrice() {
-    const prices = PRICE_TABLE[state.selectedSize];
-    state.selectedPrice = prices[state.selectedHours];
+    checkDiscountApplicable();
+    
+    const originalPrices = ORIGINAL_PRICE_TABLE[state.selectedSize];
+    const discountPrices = PRICE_TABLE[state.selectedSize];
+    
+    // 할인 적용 여부에 따라 가격 결정
+    const activePrices = state.isDiscountApplied ? discountPrices : originalPrices;
+    state.selectedPrice = activePrices[state.selectedHours];
     
     const timeCards = document.querySelectorAll('.time-card');
     timeCards.forEach(card => {
         const hours = parseInt(card.dataset.hours);
-        const price = prices[hours];
+        const originalPrice = originalPrices[hours];
+        const discountPrice = discountPrices[hours];
         const priceEl = card.querySelector('.time-price');
+        
         if (priceEl) {
-            priceEl.textContent = `₩${price.toLocaleString()}`;
+            if (state.isDiscountApplied) {
+                priceEl.innerHTML = `<span class="price-original">₩${originalPrice.toLocaleString()}</span> ₩${discountPrice.toLocaleString()}`;
+            } else {
+                priceEl.innerHTML = `₩${originalPrice.toLocaleString()}`;
+            }
         }
     });
+    
+    // 할인 안내 표시/숨김
+    updateDiscountNotice();
+}
+
+// ===== 할인 안내 업데이트 =====
+function updateDiscountNotice() {
+    const discountRow = document.getElementById('discount-notice-row');
+    const originalPriceEl = document.getElementById('original-price');
+    
+    if (discountRow) {
+        discountRow.style.display = state.isDiscountApplied ? 'flex' : 'none';
+    }
+    
+    if (originalPriceEl) {
+        originalPriceEl.style.display = state.isDiscountApplied ? 'inline' : 'none';
+    }
 }
 
 // ===== Date/Time Picker =====
@@ -1111,6 +1281,8 @@ function initCustomDatePicker() {
             state.selectedDate = formatDateValue(targetDate);
             updateDateTimeDisplay();
             updateTimeDisplay();
+            updatePrice();
+            updateSummary();
             
             Analytics.track('datetime_selected', {
                 type: 'date',
@@ -1366,6 +1538,13 @@ function updateSummary() {
     document.getElementById('selected-size').textContent = sizeLabels[state.selectedSize];
     document.getElementById('selected-time').textContent = `${state.selectedHours}시간`;
     document.getElementById('total-price').textContent = `₩${state.selectedPrice.toLocaleString()}`;
+    
+    // 원가 업데이트
+    const originalPrice = ORIGINAL_PRICE_TABLE[state.selectedSize][state.selectedHours];
+    const originalPriceEl = document.getElementById('original-price');
+    if (originalPriceEl) {
+        originalPriceEl.textContent = `₩${originalPrice.toLocaleString()}`;
+    }
     
     updateTimeDisplay();
 }

@@ -109,19 +109,22 @@
 
         <!-- Hero Section -->
         <section class="hero-section">
-            <div class="hero-main">
-                <p class="hero-tagline">手ぶらで聖水を満喫しよう</p>
-                <button class="hero-cta-small" id="hero-reserve-btn">予約する</button>
+            <p class="hero-tagline">手ぶらで聖水を満喫しよう</p>
+            <p class="hero-sub">駅から徒歩6分 · 24時間 · 本日 <strong>21</strong>名ご利用中</p>
+            
+            <div class="hero-cta-group">
+                <button class="hero-cta-secondary" id="hero-save-btn">
+                    <span class="btn-main">後で利用する</span>
+                    <span class="btn-sub">Instagram · カカオトーク</span>
+                </button>
+                <button class="hero-cta-primary" id="hero-reserve-btn">見てみる</button>
             </div>
-            <div class="hero-stats">
-                <span class="hero-stat" id="today-users">本日 <strong>21</strong>名ご利用中</span>
-                <span class="hero-divider">•</span>
-                <span class="hero-stat">¥430〜</span>
-            </div>
+            <p class="hero-discount">🎫 オープン記念、3月まで25%OFF</p>
         </section>
 
         <!-- Map Section -->
         <section class="map-section">
+            <h2 class="section-title">位置</h2>
             <div class="map-container" id="map-container">
                 <div id="map"></div>
                 <div class="walk-time-overlay" id="walk-time">
@@ -233,17 +236,17 @@
             </div>
             
             <div class="time-cards">
-                <div class="time-card selected" data-hours="4" data-price="4000">
+                <div class="time-card selected" data-hours="4" data-price="3000" data-original="4000">
                     <div class="time-badge">人気</div>
                     <div class="time-hours">4時間</div>
-                    <div class="time-price">₩4,000 <span class="yen-price">(約¥430)</span></div>
+                    <div class="time-price"><span class="price-original">₩4,000</span> ₩3,000 <span class="yen-price">(約¥320)</span></div>
                     <div class="time-desc">ショッピング後お食事まで</div>
                 </div>
                 
-                <div class="time-card" data-hours="8" data-price="7000">
+                <div class="time-card" data-hours="8" data-price="5250" data-original="7000">
                     <div class="time-badge best-value">お得</div>
                     <div class="time-hours">8時間</div>
-                    <div class="time-price">₩7,000 <span class="yen-price">(約¥750)</span></div>
+                    <div class="time-price"><span class="price-original">₩7,000</span> ₩5,250 <span class="yen-price">(約¥560)</span></div>
                     <div class="time-desc">一日中聖水を探検</div>
                 </div>
             </div>
@@ -315,14 +318,21 @@
                 <div class="summary-divider"></div>
                 <div class="summary-row total">
                     <span>お支払い金額</span>
-                    <span class="summary-price" id="total-price">₩4,000<span class="summary-yen">(約¥430)</span></span>
+                    <span class="summary-price"><span class="price-original" id="original-price">₩4,000</span> <span id="total-price">₩3,000<span class="summary-yen">(約¥320)</span></span></span>
+                </div>
+                <div class="summary-row discount-row" id="discount-notice-row">
+                    <span></span>
+                    <span class="discount-notice" id="discount-notice">🎫 オープン記念、3月まで25%OFF</span>
                 </div>
             </div>
             
-            <button class="cta-button" id="reserve-btn">
-                <span class="cta-text">予約する</span>
-                <span class="cta-arrow">→</span>
-            </button>
+            <div class="cta-button-group">
+                <button class="cta-button-secondary" id="bottom-save-btn">後で利用する</button>
+                <button class="cta-button" id="reserve-btn">
+                    <span class="cta-text">予約する</span>
+                    <span class="cta-arrow">→</span>
+                </button>
+            </div>
             
             <p class="cta-notice">アプリ不要、QRですぐ利用</p>
         </section>
@@ -425,25 +435,47 @@
             document.getElementById('selected-time').textContent = jpTexts.hours(state.selectedHours);
             const yen = krwToJpy(state.selectedPrice);
             document.getElementById('total-price').innerHTML = `₩${state.selectedPrice.toLocaleString()}<span class="summary-yen">(約¥${yen})</span>`;
+            
+            // 원가 업데이트
+            const originalPrice = ORIGINAL_PRICE_TABLE[state.selectedSize][state.selectedHours];
+            const originalPriceEl = document.getElementById('original-price');
+            if (originalPriceEl) {
+                originalPriceEl.textContent = `₩${originalPrice.toLocaleString()}`;
+            }
+            
             updateTimeDisplay();
         };
         
-        // 가격 업데이트 시 엔화도 표시
+        // 가격 업데이트 시 엔화도 표시 (할인 적용)
         const originalUpdatePrice = updatePrice;
         updatePrice = function() {
-            const prices = PRICE_TABLE[state.selectedSize];
-            state.selectedPrice = prices[state.selectedHours];
+            checkDiscountApplicable();
+            
+            const originalPrices = ORIGINAL_PRICE_TABLE[state.selectedSize];
+            const discountPrices = PRICE_TABLE[state.selectedSize];
+            const activePrices = state.isDiscountApplied ? discountPrices : originalPrices;
+            state.selectedPrice = activePrices[state.selectedHours];
             
             const timeCards = document.querySelectorAll('.time-card');
             timeCards.forEach(card => {
                 const hours = parseInt(card.dataset.hours);
-                const price = prices[hours];
-                const yen = krwToJpy(price);
+                const originalPrice = originalPrices[hours];
+                const discountPrice = discountPrices[hours];
+                const activePrice = state.isDiscountApplied ? discountPrice : originalPrice;
+                const yen = krwToJpy(activePrice);
                 const priceEl = card.querySelector('.time-price');
+                
                 if (priceEl) {
-                    priceEl.innerHTML = `₩${price.toLocaleString()} <span class="yen-price">(約¥${yen})</span>`;
+                    if (state.isDiscountApplied) {
+                        const originalYen = krwToJpy(originalPrice);
+                        priceEl.innerHTML = `<span class="price-original">₩${originalPrice.toLocaleString()}</span> ₩${discountPrice.toLocaleString()}<br><span class="yen-price">(約¥${yen})</span>`;
+                    } else {
+                        priceEl.innerHTML = `₩${originalPrice.toLocaleString()}<br><span class="yen-price">(約¥${yen})</span>`;
+                    }
                 }
             });
+            
+            updateDiscountNotice();
         };
         
         // 선택 배지 텍스트 변경

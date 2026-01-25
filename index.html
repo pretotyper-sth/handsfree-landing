@@ -89,19 +89,22 @@
 
         <!-- Hero Section -->
         <section class="hero-section">
-            <div class="hero-main">
-                <p class="hero-tagline">짐을 맡기고 자유롭게 성수를 즐기세요</p>
-                <button class="hero-cta-small" id="hero-reserve-btn">예약하기</button>
+            <p class="hero-tagline">짐을 맡기고 자유롭게 성수를 즐기세요</p>
+            <p class="hero-sub">역에서 도보 6분 · 24시간 · 오늘 <strong>21</strong>명 이용 중</p>
+            
+            <div class="hero-cta-group">
+                <button class="hero-cta-secondary" id="hero-save-btn">
+                    <span class="btn-main">나중에 이용하기</span>
+                    <span class="btn-sub">인스타 팔로우 · 카카오 채널 추가</span>
+                </button>
+                <button class="hero-cta-primary" id="hero-reserve-btn">살펴보기</button>
             </div>
-            <div class="hero-stats">
-                <span class="hero-stat" id="today-users">오늘 <strong>21</strong>명 이용 중</span>
-                <span class="hero-divider">•</span>
-                <span class="hero-stat">4,000원부터</span>
-            </div>
+            <p class="hero-discount">🎫 오픈 기념, 3월까지 25% 할인</p>
         </section>
 
         <!-- Map Section -->
         <section class="map-section">
+            <h2 class="section-title">위치</h2>
             <div class="map-container" id="map-container">
                 <div id="map"></div>
                 <div class="walk-time-overlay" id="walk-time">
@@ -213,17 +216,17 @@
             </div>
             
             <div class="time-cards">
-                <div class="time-card selected" data-hours="4" data-price="4000">
+                <div class="time-card selected" data-hours="4" data-price="3000" data-original="4000">
                     <div class="time-badge">인기</div>
                     <div class="time-hours">4시간</div>
-                    <div class="time-price">₩4,000</div>
+                    <div class="time-price"><span class="price-original">₩4,000</span> ₩3,000</div>
                     <div class="time-desc">쇼핑 후 식사까지</div>
                 </div>
                 
-                <div class="time-card" data-hours="8" data-price="7000">
+                <div class="time-card" data-hours="8" data-price="5250" data-original="7000">
                     <div class="time-badge best-value">최저가</div>
                     <div class="time-hours">8시간</div>
-                    <div class="time-price">₩7,000</div>
+                    <div class="time-price"><span class="price-original">₩7,000</span> ₩5,250</div>
                     <div class="time-desc">하루 종일 성수 탐험</div>
                 </div>
             </div>
@@ -295,14 +298,21 @@
                 <div class="summary-divider"></div>
                 <div class="summary-row total">
                     <span>결제 금액</span>
-                    <span class="summary-price" id="total-price">₩4,000</span>
+                    <span class="summary-price"><span class="price-original" id="original-price">₩4,000</span> <span id="total-price">₩3,000</span></span>
+                </div>
+                <div class="summary-row discount-row" id="discount-notice-row">
+                    <span></span>
+                    <span class="discount-notice" id="discount-notice">🎫 오픈 기념, 3월까지 25% 할인</span>
                 </div>
             </div>
             
-            <button class="cta-button" id="reserve-btn">
-                <span class="cta-text">예약하기</span>
-                <span class="cta-arrow">→</span>
-            </button>
+            <div class="cta-button-group">
+                <button class="cta-button-secondary" id="bottom-save-btn">나중에 이용하기</button>
+                <button class="cta-button" id="reserve-btn">
+                    <span class="cta-text">예약하기</span>
+                    <span class="cta-arrow">→</span>
+                </button>
+            </div>
             
             <p class="cta-notice">앱 설치 없이 QR로 바로 이용</p>
         </section>
