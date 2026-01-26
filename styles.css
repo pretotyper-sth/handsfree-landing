@@ -1666,6 +1666,81 @@ body {
     color: var(--text-muted);
 }
 
+/* 이메일 수집 모달 */
+.email-modal {
+    text-align: center;
+}
+
+.email-modal-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.email-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.email-input {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: var(--font-primary);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.email-input::placeholder {
+    color: var(--text-muted);
+}
+
+.email-input:focus {
+    border-color: var(--text-tertiary);
+}
+
+.email-input.error {
+    border-color: #ff6b6b;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.email-submit-btn {
+    width: 100%;
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.email-submit-btn:hover {
+    background: var(--accent-secondary);
+}
+
+.email-privacy {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 12px;
+    line-height: 1.4;
+}
+
 .save-modal-desc strong {
     color: var(--success);
     font-weight: 600;

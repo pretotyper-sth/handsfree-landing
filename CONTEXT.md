@@ -44,6 +44,10 @@
 - [x] 성수역 마커: 지하철 이모지 + 역명 라벨
 - [x] 가격 표시: 원가 취소선 + 할인가 표시 (3월까지 25% 할인)
 - [x] 일본어 페이지 동기화: 모든 UI 요소 번역 완료
+- [x] 예약 버튼 → 이메일 수집 모달 (Formspree 연동)
+  - "준비중" 메시지 + 이메일 입력폼
+  - 오픈 알림 신청 기능
+  - Formspree로 이메일 수집 (https://formspree.io/f/xbdogrrz)
 
 #### Analytics (GA4) - MECE 정리 (19개 이벤트)
 
@@ -77,6 +81,7 @@
 | `size_selected` | 사이즈 선택 | size, price |
 | `time_selected` | 사용 시간 선택 | hours, price |
 | `reserve_click` | 예약 클릭 | size, hours, price |
+| `email_submitted` | 이메일 제출 | email |
 
 **5. 채널 전환 (1개)**
 | 이벤트 | 설명 | 속성 |
@@ -184,4 +189,4 @@
 
 ---
 
-*마지막 업데이트: 2026-01-25 23:00*
+*마지막 업데이트: 2026-01-26 12:30*

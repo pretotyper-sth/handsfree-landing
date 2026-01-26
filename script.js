@@ -1632,11 +1632,8 @@ function initReserveButton() {
             timeOnPage: Math.round((Date.now() - state.pageLoadTime) / 1000)
         });
         
-        if (state.reserveClickCount === 1) {
-            showErrorModal();
-        } else {
-            show503Page();
-        }
+        // 항상 이메일 수집 모달 표시
+        showEmailCollectModal();
     });
 }
 
@@ -1664,14 +1661,164 @@ function initErrorModal() {
 }
 
 function showErrorModal() {
-    document.getElementById('error-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    // 기존 에러 모달 대신 이메일 수집 모달 표시
+    showEmailCollectModal();
 }
 
 function hideErrorModal() {
     document.getElementById('error-modal').classList.remove('active');
     document.body.style.overflow = '';
 }
+
+// 이메일 수집 모달
+function showEmailCollectModal() {
+    const isJapanese = window.location.pathname.includes('/jp');
+    
+    const modalHTML = `
+        <div class="save-modal-overlay" id="email-modal-overlay">
+            <div class="save-modal email-modal">
+                <button class="save-modal-close" id="email-modal-close">✕</button>
+                <div class="email-modal-icon">🚧</div>
+                <h3 class="save-modal-title">${isJapanese ? '準備中' : '준비중'}</h3>
+                <p class="save-modal-desc">${isJapanese 
+                    ? 'まもなくオープン！メールでお知らせします。' 
+                    : '곧 오픈 예정이에요! 이메일 남겨주시면 바로 연락드릴게요.'}</p>
+                <div class="email-form">
+                    <input type="email" 
+                           id="email-input" 
+                           class="email-input" 
+                           placeholder="${isJapanese ? 'メールアドレス' : '이메일 주소'}"
+                           autocomplete="email">
+                    <button class="email-submit-btn" id="email-submit-btn">
+                        ${isJapanese ? '通知を受け取る' : '오픈 알림 받기'}
+                    </button>
+                </div>
+                <p class="email-privacy">${isJapanese 
+                    ? '※ 送信で個人情報提供に同意とみなします' 
+                    : '※ 제출 시 개인정보 제공에 동의한 것으로 간주합니다'}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.style.overflow = 'hidden';
+    
+    const overlay = document.getElementById('email-modal-overlay');
+    const closeBtn = document.getElementById('email-modal-close');
+    const emailInput = document.getElementById('email-input');
+    const submitBtn = document.getElementById('email-submit-btn');
+    
+    // 닫기
+    const closeModal = () => {
+        overlay.remove();
+        document.body.style.overflow = '';
+    };
+    
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+    });
+    
+    // 이메일 제출
+    submitBtn.addEventListener('click', () => {
+        const email = emailInput.value.trim();
+        
+        if (!email || !isValidEmail(email)) {
+            emailInput.classList.add('error');
+            emailInput.placeholder = isJapanese ? '有効なメールアドレスを入力してください' : '올바른 이메일을 입력해주세요';
+            return;
+        }
+        
+        // 이메일 저장 (localStorage + 콘솔)
+        saveEmail(email);
+        
+        // 성공 메시지 표시
+        overlay.querySelector('.save-modal').innerHTML = `
+            <div class="email-modal-icon">✅</div>
+            <h3 class="save-modal-title">${isJapanese ? '登録完了' : '등록 완료!'}</h3>
+            <p class="save-modal-desc">${isJapanese 
+                ? 'オープン時にご連絡いたします。<br>ありがとうございます！' 
+                : '오픈하면 가장 먼저 연락드릴게요.<br>감사합니다!'}</p>
+            <button class="email-submit-btn" id="email-done-btn" style="margin-top: 16px;">
+                ${isJapanese ? '確認' : '확인'}
+            </button>
+        `;
+        
+        document.getElementById('email-done-btn').addEventListener('click', closeModal);
+        
+        Analytics.track('email_submitted', { email: email });
+    });
+    
+    // Enter 키로 제출
+    emailInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') submitBtn.click();
+    });
+    
+    // 포커스
+    setTimeout(() => emailInput.focus(), 100);
+}
+
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function saveEmail(email) {
+    const isJapanese = window.location.pathname.includes('/jp');
+    
+    // Formspree로 전송
+    fetch('https://formspree.io/f/xbdogrrz', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: email,
+            language: isJapanese ? 'ja' : 'ko',
+            timestamp: new Date().toISOString(),
+            page: window.location.href
+        })
+    }).then(response => {
+        if (response.ok) {
+            console.log('✅ Formspree 전송 성공');
+        } else {
+            console.log('❌ Formspree 전송 실패');
+        }
+    }).catch(err => {
+        console.log('❌ Formspree 에러:', err);
+    });
+    
+    // localStorage에도 백업 저장
+    const emails = JSON.parse(localStorage.getItem('hf_collected_emails') || '[]');
+    const entry = {
+        email: email,
+        timestamp: new Date().toISOString(),
+        language: isJapanese ? 'ja' : 'ko'
+    };
+    emails.push(entry);
+    localStorage.setItem('hf_collected_emails', JSON.stringify(emails));
+    
+    console.log('📧 이메일 수집됨:', entry);
+}
+
+// 수집된 이메일 확인용 함수
+window.getEmails = () => {
+    const emails = JSON.parse(localStorage.getItem('hf_collected_emails') || '[]');
+    console.table(emails);
+    return emails;
+};
+
+// 이메일 목록 복사
+window.copyEmails = async () => {
+    const emails = JSON.parse(localStorage.getItem('hf_collected_emails') || '[]');
+    const text = emails.map(e => e.email).join('\n');
+    try {
+        await navigator.clipboard.writeText(text);
+        console.log('✅ 이메일 목록 복사됨!');
+    } catch (err) {
+        console.log('이메일 목록:\n' + text);
+    }
+    return emails;
+};
 
 function show503Page() {
     document.getElementById('app-container').style.display = 'none';
