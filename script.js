@@ -1682,7 +1682,7 @@ function showEmailCollectModal() {
                 <h3 class="save-modal-title">${isJapanese ? '準備中' : '준비중'}</h3>
                 <p class="save-modal-desc">${isJapanese 
                     ? 'まもなくオープン！メールでお知らせします。' 
-                    : '곧 오픈 예정이에요! 이메일 남겨주시면 바로 연락드릴게요.'}</p>
+                    : '곧 오픈 예정이에요!<br>이메일 남겨주시면 바로 연락드릴게요.'}</p>
                 <div class="email-form">
                     <input type="email" 
                            id="email-input" 
